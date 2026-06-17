@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Struktur Organisasi Digital</title>
+    <style>
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #0f172a; color: #f8fafc; min-height: 100vh;
+            display: flex; flex-direction: column; overflow-x: auto; position: relative;
+        }
+        header {
+            background: linear-gradient(90deg, #1e3a8a, #0f172a);
+            padding: 20px 40px; display: flex; justify-content: space-between;
+            align-items: center; border-bottom: 4px solid #3b82f6;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            width: 100%; position: sticky; top: 0; z-index: 10;
+        }
+        .logo-title h1 { font-size: 2rem; font-weight: 800; letter-spacing: 1px; color: #ffffff; text-transform: uppercase; }
+        .logo-title p { color: #94a3b8; font-size: 1rem; margin-top: 5px; }
+        
+        /* CONTAINER UTAMA BAGAN */
+        main { flex: 1; padding: 40px; display: flex; justify-content: center; align-items: flex-start; min-width: 1200px; }
+        .tree { display: flex; flex-direction: column; align-items: center; gap: 40px; width: 100%; }
+        .row { display: flex; justify-content: center; gap: 30px; width: 100%; position: relative; }
+
+        /* CARD STYLE (GAYA KOTAK JABATAN) */
+        .card {
+            background: #1e293b; border: 2px solid #334155; border-radius: 12px;
+            padding: 15px 25px; min-width: 240px; text-align: center;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease; position: relative;
+        }
+        .card:hover { border-color: #3b82f6; transform: translateY(-5px); box-shadow: 0 15px 20px -3px rgba(59, 130, 246, 0.2); }
+        
+        /* WARNA KHUSUS TINGKATAN JABATAN */
+        .level-1 { border-color: #ef4444; background: linear-gradient(185deg, #1e293b, #451a03); } /* Pimpinan Utama */
+        .level-1 .role { color: #f97316; }
+        .level-2 { border-color: #eab308; background: linear-gradient(185deg, #1e293b, #1c2d37); } /* Wakil / Staf Ahli */
+        .level-2 .role { color: #eab308; }
+        .level-3 { border-color: #3b82f6; } /* Kepala Seksi / Urusan */
+        .level-3 .role { color: #3b82f6; }
+
+        .card .role { font-size: 0.9rem; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; }
+        .card .name { font-size: 1.15rem; font-weight: bold; color: #ffffff; }
+        .card .id-number { font-size: 0.85rem; color: #94a3b8; margin-top: 4px; font-variant-numeric: tabular-nums; }
+
+        /* GARIS PENGHUBUNG STRUKTUR (CSS PURE) */
+        .row::before {
+            content: ''; position: absolute; top: -20px; left: 50%;
+            width: 2px; height: 20px; background-color: #475569; display: none;
+        }
+        .tree > .row ~ .row::before { display: block; }
+
+        /* PANEL BUTTON SETTING */
+        .btn-setting {
+            background-color: #334155; color: #f8fafc; border: 1px solid #475569;
+            padding: 10px 15px; border-radius: 8px; cursor: pointer; font-weight: 600; transition: all 0.2s;
+        }
+        .btn-setting:hover { background-color: #3b82f6; border-color: #3b82f6; }
+
+        /* MODAL INPUT DATA */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.8);
+            display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s ease;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-content { background-color: #1e293b; width: 90%; max-width: 500px; max-height: 85vh; border-radius: 16px; border: 1px solid #475569; padding: 25px; display: flex; flex-direction: column; }
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .modal-header h2 { font-size: 1.3rem; color: #3b82f6; }
+        .btn-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+        
+        .form-group { display: flex; flex-direction: column; gap: 12px; margin-bottom: 15px; }
+        .form-group label { font-size: 0.9rem; color: #cbd5e1; font-weight: 500; }
+        .form-group input, .form-group select { background-color: #0f172a; border: 1px solid #334155; color: #f8fafc; padding: 10px; border-radius: 6px; font-size: 0.95rem; width: 100%; }
+        .btn-submit { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; }
+        
+        .manager-list { flex: 1; overflow-y: auto; border-top: 1px solid #334155; padding-top: 15px; margin-top: 15px; }
+        .manager-item { display: flex; justify-content: space-between; align-items: center; background-color: #0f172a; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #2d3748; }
+        .manager-item-text { font-size: 0.85rem; color: #cbd5e1; }
+        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 0.75rem; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="logo-title">
+            <h1 id="titleDisplay">STRUKTUR ORGANISASI</h1>
+            <p>Sistem Informasi Tampilan Personel Digital</p>
+        </div>
+        <button class="btn-setting" onclick="toggleModal(true)">⚙️ Edit Struktur</button>
+    </header>
+
+    <main>
+        <div class="tree" id="orgTreeContainer">
+            </div>
+    </main>
+
+    <div class="modal-overlay" id="settingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>⚙️ Pengaturan Personel Bagan</h2>
+                <button class="btn-close" onclick="toggleModal(false)">✕</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Judul Struktur</label>
+                <input type="text" id="inputTitle" placeholder="Contoh: STAFF LOGISTIK" onchange="updateTitle(this.value)">
+            </div>
+            
+            <hr style="border: 0; border-top: 1px solid #334155; margin: 10px 0;">
+            
+            <div class="form-group">
+                <label>Tingkatan Jabatan (Level)</label>
+                <select id="inputLevel">
+                    <option value="1">Level 1 (Pimpinan / Komandan)</option>
+                    <option value="2">Level 2 (Wakil / Staf Inti)</option>
+                    <option value="3">Level 3 (Kepala Seksi / Anggota)</option>
+                </select>
+                <label>Nama Jabatan / Posisi</label>
+                <input type="text" id="inputRole" placeholder="Contoh: KALOG / KASI LOG">
+                <label>Nama Lengkap Personel</label>
+                <input type="text" id="inputName" placeholder="Nama Lengkap & Gelar/Pangkat">
+                <label>NRP / NIP (Opsional)</label>
+                <input type="text" id="inputID" placeholder="Contoh: NRP. 123456">
+            </div>
+            <button class="btn-submit" onclick="addPersonel()">＋ Tambah Personel</button>
+            
+            <div class="manager-list" id="managerList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Key Penyimpanan Memory Browser Lokal
+        const STORAGE_KEY = "DIGITAL_ORG_DATA";
+        const TITLE_KEY = "DIGITAL_ORG_TITLE";
+
+        // Template Data Awal (Jika Memory Masih Kosong)
+        const defaultData = [
+            { level: "1", role: "Komandan", name: "Nama Pimpinan Utama, S.E.", idNo: "NRP. 112233" },
+            { level: "2", role: "Wadan / Urusan Dalam", name: "Nama Wakil Pimpinan", idNo: "NRP. 445566" },
+            { level: "3", role: "Kasi Logistik", name: "Staf Logistik 1", idNo: "NRP. 778899" },
+            { level: "3", role: "Kasi Ops", name: "Staf Operasional 1", idNo: "NRP. 998877" }
+        ];
+
+        let orgData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultData;
+        let orgTitle = localStorage.getItem(TITLE_KEY) || "STRUKTUR ORGANISASI TIM";
+
+        // 1. INisialisasi TAMPILAN UTAMA
+        function initApp() {
+            document.getElementById('titleDisplay').textContent = orgTitle;
+            document.getElementById('inputTitle').value = orgTitle;
+            renderTree();
+        }
+
+        // 2. RENDER STRUKTUR BAGAN KOTAK
+        function renderTree() {
+            const container = document.getElementById('orgTreeContainer');
+            const managerList = document.getElementById('managerList');
+            container.innerHTML = '';
+            if(managerList) managerList.innerHTML = '';
+
+            // Memisahkan data berdasarkan Level tingkatan (1, 2, 3)
+            const levels = {
+                1: orgData.filter(item => item.level === "1"),
+                2: orgData.filter(item => item.level === "2"),
+                3: orgData.filter(item => item.level === "3")
+            };
+
+            // Looping membuat baris level jabatan
+            [1, 2, 3].forEach(lvl => {
+                if (levels[lvl].length > 0) {
+                    const row = document.createElement('div');
+                    row.className = 'row';
+                    
+                    levels[lvl].forEach(person => {
+                        const card = document.createElement('div');
+                        card.className = `card level-${lvl}`;
+                        card.innerHTML = `
+                            <div class="role">${person.role}</div>
+                            <div class="name">${person.name}</div>
+                            <div class="id-number">${person.idNo || ''}</div>
+                        `;
+                        row.appendChild(card);
+                    });
+                    container.appendChild(row);
+                }
+            });
+
+            // Sinkronisasi data ke Panel Pengaturan (Daftar Hapus)
+            orgData.forEach((person, index) => {
+                if(managerList) {
+                    const item = document.createElement('div');
+                    item.className = 'manager-item';
+                    item.innerHTML = `
+                        <div class="manager-item-text">
+                            <strong>Lvl ${person.level} - ${person.role}</strong><br>${person.name}
+                        </div>
+                        <button class="btn-delete" onclick="deletePersonel(${index})">Hapus</button>
+                    `;
+                    managerList.appendChild(item);
+                }
+            });
+        }
+
+        // 3. TAMBAH PERSONEL BARU
+        function addPersonel() {
+            const level = document.getElementById('inputLevel').value;
+            const role = document.getElementById('inputRole').value.trim();
+            const name = document.getElementById('inputName').value.trim();
+            const idNo = document.getElementById('inputID').value.trim();
+
+            if (!role || !name) {
+                return alert("Mohon isi Nama Jabatan dan Nama Lengkap Personel!");
+            }
+
+            orgData.push({ level, role, name, idNo });
+            saveData();
+            
+            // Bersihkan Form input setelah sukses
+            document.getElementById('inputRole').value = '';
+            document.getElementById('inputName').value = '';
+            document.getElementById('inputID').value = '';
+        }
+
+        // 4. HAPUS PERSONEL
+        function deletePersonel(index) {
+            if (confirm("Hapus personel ini dari bagan struktur?")) {
+                orgData.splice(index, 1);
+                saveData();
+            }
+        }
+
+        // 5. UPDATE JUDUL ATAS
+        function updateTitle(val) {
+            orgTitle = val.trim() || "STRUKTUR ORGANISASI";
+            document.getElementById('titleDisplay').textContent = orgTitle;
+            localStorage.setItem(TITLE_KEY, orgTitle);
+        }
+
+        // 6. SIMPAN DATA KE MEMORI LOCAL BROWSER
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(orgData));
+            renderTree();
+        }
+
+        function toggleModal(show) { document.getElementById('settingModal').classList.toggle('active', show); }
+
+        // RUNNING AWAL SAAT LAYAR DIBUKA
+        initApp();
+    </script>
+</body>
+</html>
