@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struktur Organisasi - Korpasgat Cloud Layout</title>
+    <title>Struktur Organisasi - Korpasgat Column Layout</title>
     <style>
         * {
             margin: 0; padding: 0; box-sizing: border-box;
@@ -24,359 +24,42 @@
         .logo-title p { color: #f97316; font-size: 1rem; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px; }
         
         /* CONTAINER STRUKTUR UTAMA */
-        main { flex: 1; padding: 50px 20px; display: flex; justify-content: center; align-items: flex-start; min-width: 1300px; }
-        .tree { display: flex; flex-direction: column; align-items: center; gap: 50px; width: 100%; }
+        main { flex: 1; padding: 40px 20px; display: flex; justify-content: center; align-items: flex-start; min-width: 1200px; }
+        .tree-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
         
-        /* BARIS STRUKTUR */
-        .row { display: flex; justify-content: center; gap: 40px; width: 100%; position: relative; min-height: 120px; }
-
-        /* GARIS HUBUNG ANTAR BARIS */
-        .row::before {
-            content: ''; position: absolute; top: -25px; left: 50%;
-            width: 3px; height: 25px; background-color: #f97316; display: none;
+        /* BARIS UTAMA (ASLOG) */
+        .top-leader-row { display: flex; justify-content: center; margin-bottom: 40px; position: relative; width: 100%; }
+        
+        /* GRUP DIVISI DI BAWAH ASLOG */
+        .staff-divisions-container { display: flex; justify-content: center; gap: 60px; position: relative; padding-top: 20px; }
+        
+        /* GARIS HUBUNG UTAMA DARI ASLOG KE PARA PABANDYA */
+        .staff-divisions-container::before {
+            content: ''; position: absolute; top: -20px; left: 5%; right: 5%; height: 3px; background-color: #f97316;
         }
-        .tree > .row ~ .row::before { display: block; }
+        .top-leader-row::after {
+            content: ''; position: absolute; bottom: -40px; left: 50%; width: 3px; height: 40px; background-color: #f97316; transform: translateX(-50%);
+        }
 
-        /* KOTAK JABATAN (CARD) DENGAN FOTO */
+        /* SATUAN GRUP KOLOM KEBANDUAN (PABANDYA + STAFNYA) */
+        .division-column { display: flex; flex-direction: column; align-items: center; gap: 30px; position: relative; }
+        
+        /* Garis vertikal pendek penghubung dari garis horizontal ke kepala Pabandya */
+        .division-column::before {
+            content: ''; position: absolute; top: -40px; width: 3px; height: 40px; background-color: #f97316;
+        }
+
+        /* GARIS HUBUNG VERTIKAL INTERNAL ANTARA PABANDYA KE KAUR-KAURNYA */
+        .sub-staff-row { display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; padding-top: 20px; width: 100%; }
+        .sub-staff-row::before {
+            content: ''; position: absolute; top: -10px; left: 50%; width: 3px; height: 30px; background-color: #0284c7; transform: translateX(-50%);
+        }
+
+        /* KOTAK JABATAN (CARD) */
         .card {
             background: #1c2541; border: 2px solid #3a506b; border-radius: 14px;
-            padding: 20px; width: 280px; text-align: center;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease; position: relative;
-            display: flex; flex-direction: column; align-items: center; gap: 12px;
+            padding: 15px; width: 260px; text-align: center;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
+            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
         }
-        
-        /* WARNA TEMATIK BERDASARKAN BARIS */
-        .row-idx-1 .card { border-color: #f97316; background: linear-gradient(180deg, #1c2541 0%, #3a2214 100%); }
-        .row-idx-1 .role { color: #f97316; }
-        
-        .row-idx-2 .card { border-color: #0284c7; background: linear-gradient(180deg, #1c2541 0%, #132a3a 100%); }
-        .row-idx-2 .role { color: #0284c7; }
-        
-        .row-idx-3 .card { border-color: #64748b; background-color: #1c2541; }
-        .row-idx-3 .role { color: #cbd5e1; }
-        
-        .row-idx-4 .card { border-color: #475569; background-color: #111827; }
-        .row-idx-4 .role { color: #94a3b8; }
-
-        /* FRAME FOTO PERSONEL */
-        .photo-frame {
-            width: 90px; height: 110px; border-radius: 8px;
-            border: 2px solid #3a506b; background-color: #0b1329;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
-        }
-        .row-idx-1 .photo-frame { border-color: #f97316; }
-        .row-idx-2 .photo-frame { border-color: #0284c7; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* DETAIL TEKS */
-        .card-details { width: 100%; }
-        .card .role { font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; font-size: 0.85rem; }
-        .card .name { font-size: 1.1rem; font-weight: bold; color: #ffffff; line-height: 1.3; }
-        .card .id-number { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; font-variant-numeric: tabular-nums; }
-
-        /* TOMBOL UTAMA */
-        .btn-setting {
-            background-color: #f97316; color: #ffffff; border: none;
-            padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; 
-            transition: all 0.2s; box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2);
-        }
-        .btn-setting:hover { background-color: #ea580c; }
-
-        /* MODAL PANEL PENGATURAN */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.85);
-            display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s ease;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background-color: #1c2541; width: 90%; max-width: 580px; max-height: 92vh; border-radius: 16px; border: 2px solid #3a506b; padding: 25px; display: flex; flex-direction: column; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #3a506b; padding-bottom: 12px; }
-        .modal-header h2 { font-size: 1.4rem; color: #f97316; }
-        .btn-close { background: none; border: none; color: #94a3b8; font-size: 1.6rem; cursor: pointer; }
-        
-        .form-container { overflow-y: auto; flex: 1; padding-right: 5px; }
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-        .form-group label { font-size: 0.8rem; color: #cbd5e1; font-weight: 600; text-transform: uppercase; }
-        .form-group input, .form-group select { background-color: #0b1329; border: 1px solid #3a506b; color: #f8fafc; padding: 10px; border-radius: 6px; font-size: 0.95rem; width: 100%; }
-        .form-group input:focus, .form-group select:focus { border-color: #f97316; outline: none; }
-        
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
-        .btn-submit { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.95rem; text-transform: uppercase; margin-top: 5px; }
-        .btn-submit:hover { background-color: #059669; }
-        .btn-cancel-edit { background-color: #475569; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.95rem; text-transform: uppercase; margin-top: 5px; display: none;}
-
-        .manager-list { border-top: 2px dashed #3a506b; padding-top: 15px; margin-top: 15px; max-height: 200px; overflow-y: auto; }
-        .manager-item { display: flex; justify-content: space-between; align-items: center; background-color: #0b1329; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #3a506b; gap: 10px; }
-        .manager-item-text { font-size: 0.85rem; color: #cbd5e1; flex: 1; }
-        .action-buttons { display: flex; gap: 6px; }
-        .btn-action-edit { background-color: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        
-        /* INDIKATOR LOADING CLOUD */
-        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0b1329; display: flex; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: #f97316; transition: opacity 0.5s ease; }
-    </style>
-</head>
-<body>
-
-    <div class="loading-overlay" id="loadingView">📡 Menghubungkan ke Server nPoint Cloud...</div>
-
-    <header>
-        <div class="logo-title">
-            <h1 id="titleDisplay">STAFF LOGISTIK KORPASGAT</h1>
-            <p>KOMANDO DAERAH - KORPS PASUKAN GERAK CEPAT</p>
-        </div>
-        <button class="btn-setting" onclick="toggleModal(true)">⚙️ Pengaturan Bagan</button>
-    </header>
-
-    <main>
-        <div class="tree" id="orgTreeContainer"></div>
-    </main>
-
-    <!-- PANEL POPUP UTAMA -->
-    <div class="modal-overlay" id="settingModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">⚙️ Manajer Struktur & Foto Personel</h2>
-                <button class="btn-close" onclick="toggleModal(false)">✕</button>
-            </div>
-            
-            <div class="form-container">
-                <div class="form-group">
-                    <label>Nama Satuan / Judul Utama</label>
-                    <input type="text" id="inputTitle" placeholder="Contoh: TEAM LOGISTIK KORPASGAT" onchange="updateTitle(this.value)">
-                </div>
-                
-                <hr style="border: 0; border-top: 1px solid #3a506b; margin: 8px 0;">
-                
-                <div class="form-group">
-                    <div class="form-row">
-                        <div>
-                            <label>Letak Baris (Tingkat)</label>
-                            <select id="inputRowPos">
-                                <option value="1">Baris 1 (Paling Atas)</option>
-                                <option value="2">Baris 2 (Tengah Atas)</option>
-                                <option value="3">Baris 3 (Tengah Bawah)</option>
-                                <option value="4">Baris 4 (Paling Bawah)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Urutan Horizontal</label>
-                            <input type="number" id="inputColPos" value="1" min="1" max="10">
-                        </div>
-                    </div>
-                    
-                    <label>Nama Jabatan / Dinas</label>
-                    <input type="text" id="inputRole" placeholder="Contoh: ASLOG KORPASGAT">
-                    
-                    <label>Pangkat & Nama Lengkap</label>
-                    <input type="text" id="inputName" placeholder="Contoh: Kolonel Pas ...">
-                    
-                    <label>Nomor NRP Personel</label>
-                    <input type="text" id="inputID" placeholder="Contoh: NRP. 123456">
-                    
-                    <label>Link Url Foto Online</label>
-                    <input type="text" id="inputPhoto" placeholder="Contoh: https://site.com/foto.jpg">
-                </div>
-                
-                <button class="btn-submit" id="btnSubmitForm" onclick="addOrUpdatePersonel()">💾 Simpan & Sinkronisasi Cloud</button>
-                <button class="btn-cancel-edit" id="btnCancelEdit" onclick="cancelEditMode()">Batal Edit</button>
-                
-                <div class="manager-list" id="managerList"></div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // MASUKKAN URL API NPOINT ANDA DI SINI
-        const NPOINT_API_URL = "https://api.npoint.io/ebd18dbbc0ed2904d9ab";
-
-        const defaultAvatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzQ3NTU2OSI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQg1Ljc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+";
-
-        let orgData = [];
-        let orgTitle = "STAFF LOGISTIK KORPASGAT";
-        let editingId = null;
-
-        // LOAD DATA DARI CLOUD NPOINT
-        async function loadCloudData() {
-            try {
-                document.getElementById('loadingView').style.opacity = "1";
-                document.getElementById('loadingView').style.display = "flex";
-                
-                const response = await fetch(NPOINT_API_URL);
-                if (!response.ok) throw new Error("Gagal mengambil data dari server");
-                const data = await response.json();
-                
-                orgData = data.personel || [];
-                orgTitle = data.title || "STAFF LOGISTIK KORPASGAT";
-                
-                document.getElementById('titleDisplay').textContent = orgTitle;
-                document.getElementById('inputTitle').value = orgTitle;
-                
-                renderTree();
-                
-                document.getElementById('loadingView').style.opacity = "0";
-                setTimeout(() => document.getElementById('loadingView').style.display = "none", 500);
-            } catch (err) {
-                alert("Gagal memuat database cloud. Periksa kembali link nPoint Anda.");
-                console.error(err);
-            }
-        }
-
-        // UPLOAD DATA KE CLOUD NPOINT
-        async function saveCloudData() {
-            try {
-                document.getElementById('loadingView').textContent = "🔄 Menyelaraskan Data ke Cloud...";
-                document.getElementById('loadingView').style.display = "flex";
-                document.getElementById('loadingView').style.opacity = "1";
-
-                const payload = { title: orgTitle, personel: orgData };
-                
-                const response = await fetch(NPOINT_API_URL, {
-                    method: "POST", // nPoint mendukung POST/PUT ke URL aslinya untuk update data
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error("Gagal mengirim data");
-                
-                await loadCloudData();
-            } catch (err) {
-                alert("Gagal mengamankan data ke Cloud. Periksa koneksi internet.");
-                console.error(err);
-            }
-        }
-
-        function renderTree() {
-            const container = document.getElementById('orgTreeContainer');
-            const managerList = document.getElementById('managerList');
-            container.innerHTML = '';
-            if(managerList) managerList.innerHTML = '';
-
-            for (let r = 1; r <= 4; r++) {
-                const rowData = orgData.filter(item => parseInt(item.rowPos) === r);
-                rowData.sort((a, b) => parseInt(a.colPos) - parseInt(b.colPos));
-
-                if (rowData.length > 0) {
-                    const rowDiv = document.createElement('div');
-                    rowDiv.className = `row row-idx-${r}`;
-                    
-                    rowData.forEach(person => {
-                        const imgUrl = person.photo ? person.photo : defaultAvatarBase64;
-                        const card = document.createElement('div');
-                        card.className = 'card';
-                        card.innerHTML = `
-                            <div class="photo-frame">
-                                <img src="${imgUrl}" onerror="this.src='${defaultAvatarBase64}'" alt="Foto">
-                            </div>
-                            <div class="card-details">
-                                <div class="role">${person.role}</div>
-                                <div class="name">${person.name}</div>
-                                <div class="id-number">${person.idNo || ''}</div>
-                            </div>
-                        `;
-                        rowDiv.appendChild(card);
-                    });
-                    container.appendChild(rowDiv);
-                }
-            }
-
-            if(managerList) {
-                orgData.forEach((person) => {
-                    const item = document.createElement('div');
-                    item.className = 'manager-item';
-                    item.innerHTML = `
-                        <div class="manager-item-text">
-                            <span style="background:#f97316; color:white; padding:2px 5px; border-radius:4px; font-size:10px; font-weight:bold;">B-${person.rowPos} | U-${person.colPos}</span>
-                            <strong style="margin-left:4px;">${person.role}</strong> - ${person.name}
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn-action-edit" onclick="startEditPersonel('${person.id}')">Edit</button>
-                            <button class="btn-delete" onclick="deletePersonel('${person.id}')">Hapus</button>
-                        </div>
-                    `;
-                    managerList.appendChild(item);
-                });
-            }
-        }
-
-        function addOrUpdatePersonel() {
-            const rowPos = parseInt(document.getElementById('inputRowPos').value);
-            const colPos = parseInt(document.getElementById('inputColPos').value) || 1;
-            const role = document.getElementById('inputRole').value.trim();
-            const name = document.getElementById('inputName').value.trim();
-            const idNo = document.getElementById('inputID').value.trim();
-            const photo = document.getElementById('inputPhoto').value.trim();
-
-            if (!role || !name) return alert("Nama Jabatan dan Nama Lengkap wajib diisi!");
-
-            if (editingId) {
-                const index = orgData.findIndex(item => item.id === editingId);
-                if (index !== -1) {
-                    orgData[index] = { id: editingId, rowPos, colPos, role, name, idNo, photo };
-                }
-                cancelEditMode();
-            } else {
-                const newId = String(new Date().getTime());
-                orgData.push({ id: newId, rowPos, colPos, role, name, idNo, photo });
-                clearForm();
-            }
-            saveCloudData();
-        }
-
-        function startEditPersonel(id) {
-            const person = orgData.find(item => item.id === id);
-            if (!person) return;
-
-            editingId = id;
-            document.getElementById('modalTitle').textContent = "✏️ Ubah Data Personel Aktif";
-            document.getElementById('btnSubmitForm').textContent = "💾 Simpan Perubahan Cloud";
-            document.getElementById('btnCancelEdit').style.display = "block";
-
-            document.getElementById('inputRowPos').value = person.rowPos;
-            document.getElementById('inputColPos').value = person.colPos;
-            document.getElementById('inputRole').value = person.role;
-            document.getElementById('inputName').value = person.name;
-            document.getElementById('inputID').value = person.idNo;
-            document.getElementById('inputPhoto').value = person.photo;
-        }
-
-        function cancelEditMode() {
-            editingId = null;
-            document.getElementById('modalTitle').textContent = "⚙️ Manajer Struktur & Foto Personel";
-            document.getElementById('btnSubmitForm').textContent = "💾 Simpan & Sinkronisasi Cloud";
-            document.getElementById('btnCancelEdit').style.display = "none";
-            clearForm();
-        }
-
-        function deletePersonel(id) {
-            if (confirm("Hapus personel ini dari koordinat bagan?")) {
-                if(editingId === id) cancelEditMode();
-                orgData = orgData.filter(item => item.id !== id);
-                saveCloudData();
-            }
-        }
-
-        function clearForm() {
-            document.getElementById('inputRole').value = '';
-            document.getElementById('inputName').value = '';
-            document.getElementById('inputID').value = '';
-            document.getElementById('inputPhoto').value = '';
-            document.getElementById('inputColPos').value = '1';
-        }
-
-        function updateTitle(val) {
-            orgTitle = val.trim() || "STAFF LOGISTIK KORPASGAT";
-            document.getElementById('titleDisplay').textContent = orgTitle;
-            saveCloudData();
-        }
-
-        function toggleModal(show) { 
-            if(!show) cancelEditMode();
-            document.getElementById('settingModal').classList.toggle('active', show); 
-        }
-
-        window.addEventListener('DOMContentLoaded', loadCloudData);
-    </script>
-</body>
-</html>
+        .card:hover { border-color: #f97316; transform: translateY(-3px); }
