@@ -418,247 +418,234 @@
 
 
 
-   <script>
-        // MENGGUNAKAN URL ENDPOINT SINKRONISASI CLOUD COMPATIBLE NPOINT
-        const NPOINT_API_URL = "https://api.npoint.io/847a46bf3432b19e8168";
+  <script>
+    const defaultAvatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iI2QzNTY5Ij48YHAhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQg1Ljc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+";
 
-        const defaultAvatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iHubkMzU2OSI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LTEuNzkgNC00cy0xLjc5LTQtNC00LTQg1Ljc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+";
+    let orgData = [];
+    let orgTitle = "STAFF LOGISTIK KORPASGAT";
+    let editingId = null;
 
-        let orgData = [];
-        let orgTitle = "STAFF LOGISTIK KORPASGAT";
-        let editingId = null;
-
-        async function loadCloudData() {
-            try {
-                document.getElementById('loadingView').textContent = "📡 Menghubungkan ke Server nPoint Cloud...";
-                document.getElementById('loadingView').style.opacity = "1";
-                document.getElementById('loadingView').style.display = "flex";
-                
-                // Gunakan cache bust agar browser selalu mengambil data paling segar dari cloud
-                const response = await fetch(`${NPOINT_API_URL}?nocache=${new Date().getTime()}`);
-                if (!response.ok) throw new Error("Gagal mengambil data dari cloud");
-                const data = await response.json();
-                
-                orgData = data.personel || [];
-                orgTitle = data.title || "STAFF LOGISTIK KORPASGAT";
-                
-                document.getElementById('titleDisplay').textContent = orgTitle;
-                document.getElementById('inputTitle').value = orgTitle;
-                
-                renderTree();
-                
-                document.getElementById('loadingView').style.opacity = "0";
-                setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
-            } catch (err) {
-                console.error(err);
-                document.getElementById('loadingView').style.display = "none";
-                alert("Koneksi gagal terhubung atau database nPoint cloud kosong / salah format.");
-            }
-        }
-
-        async function saveCloudData() {
-            try {
-                document.getElementById('loadingView').textContent = "🔄 Menyelaraskan Struktur ke Cloud...";
-                document.getElementById('loadingView').style.display = "flex";
-                document.getElementById('loadingView').style.opacity = "1";
-
-                const payload = { title: orgTitle, personel: orgData };
-                
-                // PERBAIKAN UTAMA: Mengubah POST menjadi PUT untuk memperbarui ID nPoint yang sama
-                const response = await fetch(NPOINT_API_URL, {
-                    method: "PUT",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) throw new Error("Gagal menyimpan ke npoint");
-                
-                // Memuat ulang data setelah berhasil disimpan
-                await loadCloudData();
-            } catch (err) {
-                document.getElementById('loadingView').style.opacity = "0";
-                setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
-                alert("Gagal mengamankan data ke Cloud. Pastikan internet stabil.");
-                console.error(err);
-            }
-        }
-
-        // FUNGSI RENDER UTAMA BERBASIS DIVISI (KOLOM VERTIKAL)
-        function renderTree() {
-            const container = document.getElementById('orgTreeContainer');
-            const managerList = document.getElementById('managerList');
-            if(!container) return;
+    // MEMUAT DATA DARI LOCALSTORAGE
+    function loadLocalData() {
+        try {
+            document.getElementById('loadingView').textContent = "📡 Memuat Struktur Organisasi...";
+            document.getElementById('loadingView').style.opacity = "1";
+            document.getElementById('loadingView').style.display = "flex";
             
-            container.innerHTML = '';
-            if(managerList) managerList.innerHTML = '';
-
-            // 1. BUAT BARIS ATAS (LEVEL 1 / ASLOG)
-            const level1Data = orgData.filter(item => parseInt(item.rowPos) === 1);
-            const topRowDiv = document.createElement('div');
-            topRowDiv.className = 'top-leader-row';
+            const localTitle = localStorage.getItem('org_title');
+            const localPersonel = localStorage.getItem('org_personel');
             
-            level1Data.forEach(person => {
-                topRowDiv.appendChild(createCardHTML(person, 1));
-            });
-            container.appendChild(topRowDiv);
+            orgTitle = localTitle ? localTitle : "STAFF LOGISTIK KORPASGAT";
+            orgData = localPersonel ? JSON.parse(localPersonel) : [];
+            
+            document.getElementById('titleDisplay').textContent = orgTitle;
+            document.getElementById('inputTitle').value = orgTitle;
+            
+            renderTree();
+            
+            document.getElementById('loadingView').style.opacity = "0";
+            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
+        } catch (err) {
+            console.error(err);
+            document.getElementById('loadingView').style.display = "none";
+            alert("Gagal memuat data dari penyimpanan lokal.");
+        }
+    }
 
-            // 2. CONTAINER BESAR UNTUK STRUKTUR KEBAWAHNYA
-            const divisionsContainer = document.createElement('div');
-            divisionsContainer.className = 'staff-divisions-container';
+    // MENYIMPAN DATA KE LOCALSTORAGE
+    function saveLocalData() {
+        try {
+            document.getElementById('loadingView').textContent = "🔄 Menyimpan Perubahan...";
+            document.getElementById('loadingView').style.display = "flex";
+            document.getElementById('loadingView').style.opacity = "1";
 
-            // Ambil seluruh grup kolom yang aktif secara dinamis (Kolom 1, Kolom 2, dst)
-            const activeCols = [...new Set(orgData.filter(item => parseInt(item.rowPos) > 1).map(item => parseInt(item.colPos)))];
-            activeCols.sort((a, b) => a - b);
+            localStorage.setItem('org_title', orgTitle);
+            localStorage.setItem('org_personel', JSON.stringify(orgData));
+            
+            renderTree();
 
-            // Bangun kolom vertikal khusus untuk masing-masing Pabandya
-            activeCols.forEach(colIdx => {
-                const colDiv = document.createElement('div');
-                colDiv.className = 'division-column';
+            document.getElementById('loadingView').style.opacity = "0";
+            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
+        } catch (err) {
+            document.getElementById('loadingView').style.opacity = "0";
+            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
+            alert("Gagal menyimpan data ke penyimpanan lokal.");
+            console.error(err);
+        }
+    }
 
-                // Cari Pabandya di kolom ini (Row 2)
-                const pabandya = orgData.find(item => parseInt(item.rowPos) === 2 && parseInt(item.colPos) === colIdx);
-                if (pabandya) {
-                    colDiv.appendChild(createCardHTML(pabandya, 2));
-                }
+    // RENDER STRUKTUR ORGANISASI
+    function renderTree() {
+        const container = document.getElementById('orgTreeContainer');
+        const managerList = document.getElementById('managerList');
+        if(!container) return;
+        
+        container.innerHTML = '';
+        if(managerList) managerList.innerHTML = '';
 
-                // Cari seluruh staf bawahannya (Row 3 & Row 4) di kolom yang sama
-                const subStaffData = orgData.filter(item => parseInt(item.rowPos) > 2 && parseInt(item.colPos) === colIdx);
-                subStaffData.sort((a, b) => parseInt(a.rowPos) - parseInt(b.rowPos));
+        // 1. Baris Level 1 (Aslog)
+        const level1Data = orgData.filter(item => parseInt(item.rowPos) === 1);
+        const topRowDiv = document.createElement('div');
+        topRowDiv.className = 'top-leader-row';
+        
+        level1Data.forEach(person => {
+            topRowDiv.appendChild(createCardHTML(person, 1));
+        });
+        container.appendChild(topRowDiv);
 
-                if (subStaffData.length > 0) {
-                    const subStaffRow = document.createElement('div');
-                    subStaffRow.className = 'sub-staff-row';
-                    
-                    subStaffData.forEach(staff => {
-                        subStaffRow.appendChild(createCardHTML(staff, staff.rowPos));
-                    });
-                    colDiv.appendChild(subStaffRow);
-                }
+        // 2. Container Untuk Tingkat di Bawahnya
+        const divisionsContainer = document.createElement('div');
+        divisionsContainer.className = 'staff-divisions-container';
 
-                divisionsContainer.appendChild(colDiv);
-            });
+        const activeCols = [...new Set(orgData.filter(item => parseInt(item.rowPos) > 1).map(item => parseInt(item.colPos)))];
+        activeCols.sort((a, b) => a - b);
 
-            container.appendChild(divisionsContainer);
+        activeCols.forEach(colIdx => {
+            const colDiv = document.createElement('div');
+            colDiv.className = 'division-column';
 
-            // RENDER LIST HALAMAN MANAJEMEN EDIT DATA DI BAWAH PANEL
-            if(managerList) {
-                // Duplikat data untuk sorting tampilan list manajemen tanpa merusak data asli
-                const sortedListData = [...orgData];
-                sortedListData.sort((a,b) => (parseInt(a.rowPos) - parseInt(b.rowPos)) || (parseInt(a.colPos) - parseInt(b.colPos)));
+            // Kepala Pabandya (Row 2)
+            const pabandya = orgData.find(item => parseInt(item.rowPos) === 2 && parseInt(item.colPos) === colIdx);
+            if (pabandya) {
+                colDiv.appendChild(createCardHTML(pabandya, 2));
+            }
+
+            // Staf/Kaur (Row 3 & Row 4)
+            const subStaffData = orgData.filter(item => parseInt(item.rowPos) > 2 && parseInt(item.colPos) === colIdx);
+            subStaffData.sort((a, b) => parseInt(a.rowPos) - parseInt(b.rowPos));
+
+            if (subStaffData.length > 0) {
+                const subStaffRow = document.createElement('div');
+                subStaffRow.className = 'sub-staff-row';
                 
-                sortedListData.forEach((person) => {
-                    const item = document.createElement('div');
-                    item.className = 'manager-item';
-                    item.innerHTML = `
-                        <div class="manager-item-text">
-                            <span style="background:#0284c7; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">Tingkat ${person.rowPos} | Kolom ${person.colPos}</span>
-                            <strong style="margin-left:5px;">${person.role}</strong> - ${person.name}
-                        </div>
-                        <div class="action-buttons">
-                            <button class="btn-action-edit" onclick="startEditPersonel('${person.id}')">Edit</button>
-                            <button class="btn-delete" onclick="deletePersonel('${person.id}')">Hapus</button>
-                        </div>
-                    `;
-                    managerList.appendChild(item);
+                subStaffData.forEach(staff => {
+                    subStaffRow.appendChild(createCardHTML(staff, staff.rowPos));
                 });
+                colDiv.appendChild(subStaffRow);
             }
+
+            divisionsContainer.appendChild(colDiv);
+        });
+
+        container.appendChild(divisionsContainer);
+
+        // Render List Manajemen di Dalam Modal
+        if(managerList) {
+            const sortedListData = [...orgData];
+            sortedListData.sort((a,b) => (parseInt(a.rowPos) - parseInt(b.rowPos)) || (parseInt(a.colPos) - parseInt(b.colPos)));
+            
+            sortedListData.forEach((person) => {
+                const item = document.createElement('div');
+                item.className = 'manager-item';
+                item.innerHTML = `
+                    <div class="manager-item-text">
+                        <span style="background:#0284c7; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">Tingkat ${person.rowPos} | Kolom ${person.colPos}</span>
+                        <strong style="margin-left:5px;">${person.role}</strong> - ${person.name}
+                    </div>
+                    <div class="action-buttons">
+                        <button class="btn-action-edit" onclick="startEditPersonel('${person.id}')">Edit</button>
+                        <button class="btn-delete" onclick="deletePersonel('${person.id}')">Hapus</button>
+                    </div>
+                `;
+                managerList.appendChild(item);
+            });
         }
+    }
 
-        function createCardHTML(person, level) {
-            const imgUrl = person.photo ? person.photo : defaultAvatarBase64;
-            const card = document.createElement('div');
-            card.className = `card level-${level}`;
-            card.innerHTML = `
-                <div class="photo-frame">
-                    <img src="${imgUrl}" onerror="this.src='${defaultAvatarBase64}'" alt="Foto">
-                </div>
-                <div class="card-details">
-                    <div class="role">${person.role}</div>
-                    <div class="name">${person.name}</div>
-                    <div class="id-number">${person.idNo || ''}</div>
-                </div>
-            `;
-            return card;
-        }
+    function createCardHTML(person, level) {
+        const imgUrl = person.photo ? person.photo : defaultAvatarBase64;
+        const card = document.createElement('div');
+        card.className = `card level-${level}`;
+        card.innerHTML = `
+            <div class="photo-frame">
+                <img src="${imgUrl}" onerror="this.src='${defaultAvatarBase64}'" alt="Foto">
+            </div>
+            <div class="card-details">
+                <div class="role">${person.role}</div>
+                <div class="name">${person.name}</div>
+                <div class="id-number">${person.idNo || ''}</div>
+            </div>
+        `;
+        return card;
+    }
 
-        function addOrUpdatePersonel() {
-            const rowPos = parseInt(document.getElementById('inputRowPos').value);
-            const colPos = parseInt(document.getElementById('inputColPos').value);
-            const role = document.getElementById('inputRole').value.trim();
-            const name = document.getElementById('inputName').value.trim();
-            const idNo = document.getElementById('inputID').value.trim();
-            const photo = document.getElementById('inputPhoto').value.trim();
+    function addOrUpdatePersonel() {
+        const rowPos = parseInt(document.getElementById('inputRowPos').value);
+        const colPos = parseInt(document.getElementById('inputColPos').value);
+        const role = document.getElementById('inputRole').value.trim();
+        const name = document.getElementById('inputName').value.trim();
+        const idNo = document.getElementById('inputID').value.trim();
+        const photo = document.getElementById('inputPhoto').value.trim();
 
-            if (!role || !name) return alert("Nama Jabatan dan Pangkat/Nama Lengkap Personel wajib terisi!");
+        if (!role || !name) return alert("Nama Jabatan dan Pangkat/Nama Lengkap Personel wajib terisi!");
 
-            if (editingId) {
-                const index = orgData.findIndex(item => item.id === editingId);
-                if (index !== -1) {
-                    orgData[index] = { id: editingId, rowPos, colPos, role, name, idNo, photo };
-                }
-                cancelEditMode();
-            } else {
-                const newId = String(new Date().getTime());
-                orgData.push({ id: newId, rowPos, colPos, role, name, idNo, photo });
-                clearForm();
+        if (editingId) {
+            const index = orgData.findIndex(item => item.id === editingId);
+            if (index !== -1) {
+                orgData[index] = { id: editingId, rowPos, colPos, role, name, idNo, photo };
             }
-            saveCloudData();
-        }
-
-        function startEditPersonel(id) {
-            const person = orgData.find(item => item.id === id);
-            if (!person) return;
-
-            editingId = id;
-            document.getElementById('modalTitle').textContent = "✏️ Ubah Data Komponen Organisasi";
-            document.getElementById('btnSubmitForm').textContent = "💾 Simpan Pembaruan Cloud";
-            document.getElementById('btnCancelEdit').style.display = "block";
-
-            document.getElementById('inputRowPos').value = person.rowPos;
-            document.getElementById('inputColPos').value = person.colPos;
-            document.getElementById('inputRole').value = person.role;
-            document.getElementById('inputName').value = person.name;
-            document.getElementById('inputID').value = person.idNo || '';
-            document.getElementById('inputPhoto').value = person.photo || '';
-        }
-
-        function cancelEditMode() {
-            editingId = null;
-            document.getElementById('modalTitle').textContent = "⚙️ Manajer Struktur & Foto Personel";
-            document.getElementById('btnSubmitForm').textContent = "💾 Simpan & Sinkronisasi Cloud";
-            document.getElementById('btnCancelEdit').style.display = "none";
+            cancelEditMode();
+        } else {
+            const newId = String(new Date().getTime());
+            orgData.push({ id: newId, rowPos, colPos, role, name, idNo, photo });
             clearForm();
         }
+        saveLocalData();
+    }
 
-        function deletePersonel(id) {
-            if (confirm("Hapus personel ini dari kesatuan bagan?")) {
-                if(editingId === id) cancelEditMode();
-                orgData = orgData.filter(item => item.id !== id);
-                saveCloudData();
-            }
+    function startEditPersonel(id) {
+        const person = orgData.find(item => item.id === id);
+        if (!person) return;
+
+        editingId = id;
+        document.getElementById('modalTitle').textContent = "✏️ Ubah Data Komponen Organisasi";
+        document.getElementById('btnSubmitForm').textContent = "💾 Simpan Perubahan";
+        document.getElementById('btnCancelEdit').style.display = "block";
+
+        document.getElementById('inputRowPos').value = person.rowPos;
+        document.getElementById('inputColPos').value = person.colPos;
+        document.getElementById('inputRole').value = person.role;
+        document.getElementById('inputName').value = person.name;
+        document.getElementById('inputID').value = person.idNo || '';
+        document.getElementById('inputPhoto').value = person.photo || '';
+    }
+
+    function cancelEditMode() {
+        editingId = null;
+        document.getElementById('modalTitle').textContent = "⚙️ Manajer Struktur & Foto Personel";
+        document.getElementById('btnSubmitForm').textContent = "💾 Simpan Struktur";
+        document.getElementById('btnCancelEdit').style.display = "none";
+        clearForm();
+    }
+
+    function deletePersonel(id) {
+        if (confirm("Hapus personel ini dari kesatuan bagan?")) {
+            if(editingId === id) cancelEditMode();
+            orgData = orgData.filter(item => item.id !== id);
+            saveLocalData();
         }
+    }
 
-        function clearForm() {
-            document.getElementById('inputRole').value = '';
-            document.getElementById('inputName').value = '';
-            document.getElementById('inputID').value = '';
-            document.getElementById('inputPhoto').value = '';
-        }
+    function clearForm() {
+        document.getElementById('inputRole').value = '';
+        document.getElementById('inputName').value = '';
+        document.getElementById('inputID').value = '';
+        document.getElementById('inputPhoto').value = '';
+    }
 
-        function updateTitle(val) {
-            orgTitle = val.trim() || "STAFF LOGISTIK KORPASGAT";
-            document.getElementById('titleDisplay').textContent = orgTitle;
-            saveCloudData();
-        }
+    function updateTitle(val) {
+        orgTitle = val.trim() || "STAFF LOGISTIK KORPASGAT";
+        document.getElementById('titleDisplay').textContent = orgTitle;
+        saveLocalData();
+    }
 
-        function toggleModal(show) { 
-            if(!show) cancelEditMode();
-            document.getElementById('settingModal').classList.toggle('active', show); 
-        }
+    function toggleModal(show) { 
+        if(!show) cancelEditMode();
+        document.getElementById('settingModal').classList.toggle('active', show); 
+    }
 
-        window.addEventListener('DOMContentLoaded', loadCloudData);
-    </script>
-
+    window.addEventListener('DOMContentLoaded', loadLocalData);
+</script>
 </body>
 
 </html> 
