@@ -3,43 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struktur Organisasi - Korpasgat Keren</title>
+    <title>Struktur Organisasi - Korpasgat Manual Layout</title>
     <style>
         * {
             margin: 0; padding: 0; box-sizing: border-box;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
         body {
-            /* Warna Latar Belakang Tema Biru Dongker Militer Pasgat */
             background-color: #0b1329; color: #f8fafc; min-height: 100vh;
             display: flex; flex-direction: column; overflow-x: auto; position: relative;
         }
         header {
-            /* Gradasi Kombinasi Biru Skuadron & Hitam Taktis */
             background: linear-gradient(90deg, #1c2541, #0b1329);
             padding: 20px 40px; display: flex; justify-content: space-between;
-            align-items: center; border-bottom: 4px solid #f97316; /* Garis Oranye Baret Pasgat */
+            align-items: center; border-bottom: 4px solid #f97316;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
             width: 100%; position: sticky; top: 0; z-index: 10;
         }
         .logo-title h1 { font-size: 2rem; font-weight: 800; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
         .logo-title p { color: #f97316; font-size: 1rem; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px; }
         
-        /* CONTAINER UTAMA BAGAN MANUAL */
+        /* CONTAINER STRUKTUR UTAMA */
         main { flex: 1; padding: 50px 20px; display: flex; justify-content: center; align-items: flex-start; min-width: 1300px; }
         .tree { display: flex; flex-direction: column; align-items: center; gap: 45px; width: 100%; }
         
-        /* BARIS BAGAN MANUAL */
-        .row { display: flex; justify-content: center; gap: 40px; width: 100%; position: relative; }
+        /* BARIS STRUKTUR */
+        .row { display: flex; justify-content: center; gap: 40px; width: 100%; position: relative; min-height: 100px; }
 
-        /* GARIS HUBUNG VERTIKAL ANTAR LEVEL (CSS MANUAL) */
+        /* GARIS HUBUNG ANTAR BARIS */
         .row::before {
             content: ''; position: absolute; top: -25px; left: 50%;
             width: 3px; height: 25px; background-color: #f97316; display: none;
         }
         .tree > .row ~ .row::before { display: block; }
 
-        /* TAMPILAN KOTAK JABATAN (CARD PERSONEL) */
+        /* KOTAK JABATAN (CARD) */
         .card {
             background: #1c2541; border: 2px solid #3a506b; border-radius: 12px;
             padding: 18px 30px; min-width: 260px; text-align: center;
@@ -52,30 +50,24 @@
             box-shadow: 0 15px 25px rgba(249, 115, 22, 0.25); 
         }
         
-        /* WARNA SPECIAL BERDASARKAN LEVEL JABATAN */
-        .level-1 { 
-            border-color: #f97316; /* Jingga Pasgat */
-            background: linear-gradient(180deg, #1c2541 0%, #3a2214 100%); 
-        } 
-        .level-1 .role { color: #f97316; font-size: 1rem; }
+        /* IDENTIFIKASI TEMA WARNA BERDASARKAN BARIS */
+        .row-idx-1 .card { border-color: #f97316; background: linear-gradient(180deg, #1c2541 0%, #3a2214 100%); }
+        .row-idx-1 .role { color: #f97316; font-size: 1rem; }
         
-        .level-2 { 
-            border-color: #0284c7; /* Biru Langit TNI AU */
-            background: linear-gradient(180deg, #1c2541 0%, #132a3a 100%); 
-        } 
-        .level-2 .role { color: #0284c7; }
+        .row-idx-2 .card { border-color: #0284c7; background: linear-gradient(180deg, #1c2541 0%, #132a3a 100%); }
+        .row-idx-2 .role { color: #0284c7; }
         
-        .level-3 { 
-            border-color: #64748b; 
-            background-color: #1c2541;
-        } 
-        .level-3 .role { color: #cbd5e1; }
+        .row-idx-3 .card { border-color: #64748b; background-color: #1c2541; }
+        .row-idx-3 .role { color: #cbd5e1; }
+        
+        .row-idx-4 .card { border-color: #475569; background-color: #111827; }
+        .row-idx-4 .role { color: #94a3b8; }
 
         .card .role { font-weight: 800; letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px; font-size: 0.9rem; }
         .card .name { font-size: 1.2rem; font-weight: bold; color: #ffffff; }
         .card .id-number { font-size: 0.85rem; color: #94a3b8; margin-top: 5px; font-variant-numeric: tabular-nums; font-weight: 500; }
 
-        /* TOMBOL KONTROL EDIT */
+        /* TOMBOL KONTROL */
         .btn-setting {
             background-color: #f97316; color: #ffffff; border: none;
             padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; 
@@ -83,21 +75,23 @@
         }
         .btn-setting:hover { background-color: #ea580c; transform: scale(1.05); }
 
-        /* POPUP MODAL PENGATURAN */
+        /* MODAL PANEL EDIT */
         .modal-overlay {
             position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.85);
             display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s ease;
         }
         .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background-color: #1c2541; width: 90%; max-width: 520px; max-height: 90vh; border-radius: 16px; border: 2px solid #3a506b; padding: 25px; display: flex; flex-direction: column; }
+        .modal-content { background-color: #1c2541; width: 90%; max-width: 550px; max-height: 90vh; border-radius: 16px; border: 2px solid #3a506b; padding: 25px; display: flex; flex-direction: column; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid #3a506b; padding-bottom: 12px; }
         .modal-header h2 { font-size: 1.4rem; color: #f97316; }
         .btn-close { background: none; border: none; color: #94a3b8; font-size: 1.6rem; cursor: pointer; }
         
         .form-group { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
-        .form-group label { font-size: 0.9rem; color: #cbd5e1; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-        .form-group input, .form-group select { background-color: #0b1329; border: 1px solid #3a506b; color: #f8fafc; padding: 12px; border-radius: 6px; font-size: 0.95rem; width: 100%; }
+        .form-group label { font-size: 0.85rem; color: #cbd5e1; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .form-group input, .form-group select { background-color: #0b1329; border: 1px solid #3a506b; color: #f8fafc; padding: 11px; border-radius: 6px; font-size: 0.95rem; width: 100%; }
         .form-group input:focus, .form-group select:focus { border-color: #f97316; outline: none; }
+        
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         
         .btn-submit { background-color: #10b981; color: white; border: none; padding: 14px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 1rem; text-transform: uppercase; letter-spacing: 0.5px; }
         .btn-submit:hover { background-color: #059669; }
@@ -106,7 +100,6 @@
         .manager-item { display: flex; justify-content: space-between; align-items: center; background-color: #0b1329; padding: 12px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #3a506b; }
         .manager-item-text { font-size: 0.85rem; color: #cbd5e1; }
         .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete:hover { background-color: #dc2626; }
     </style>
 </head>
 <body>
@@ -127,7 +120,7 @@
     <div class="modal-overlay" id="settingModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h2>⚙️ Pengaturan Personel Komando</h2>
+                <h2>⚙️ Manajer Posisi Bagan Manual</h2>
                 <button class="btn-close" onclick="toggleModal(false)">✕</button>
             </div>
             
@@ -139,41 +132,50 @@
             <hr style="border: 0; border-top: 2px dashed #3a506b; margin: 10px 0;">
             
             <div class="form-group">
-                <label>Tingkatan Rantai Komando</label>
-                <select id="inputLevel">
-                    <option value="1">Level 1 (Komandan / Kepala Utama)</option>
-                    <option value="2">Level 2 (Wakil / Staf Log Inti)</option>
-                    <option value="3">Level 3 (Kepala Urusan / Kasi / Anggota)</option>
-                </select>
+                <div class="form-row">
+                    <div>
+                        <label>Letak Baris (Ke-Bawah)</label>
+                        <select id="inputRowPos">
+                            <option value="1">Baris 1 (Paling Atas)</option>
+                            <option value="2">Baris 2 (Tengah Atas)</option>
+                            <option value="3">Baris 3 (Tengah Bawah)</option>
+                            <option value="4">Baris 4 (Paling Bawah)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label>Urutan Kotak (Ke-Samping)</label>
+                        <input type="number" id="inputColPos" value="1" min="1" max="10" placeholder="Urutan 1, 2, 3..">
+                    </div>
+                </div>
                 
                 <label>Nama Jabatan / Dinas</label>
-                <input type="text" id="inputRole" placeholder="Contoh: ASLOG KORPASGAT / PABANDYA LOG">
+                <input type="text" id="inputRole" placeholder="Contoh: KALOG / KA URUSAN">
                 
-                <label>Pangkat, Nama Lengkap & Gelar</label>
-                <input type="text" id="inputName" placeholder="Contoh: Kolonel Pas Pasgat, S.E.">
+                <label>Pangkat & Nama Lengkap</label>
+                <input type="text" id="inputName" placeholder="Contoh: Mayor Pas ...">
                 
-                <label>Nomor NRP Personel</label>
-                <input type="text" id="inputID" placeholder="Contoh: NRP. 543210">
+                <label>Nomor NRP</label>
+                <input type="text" id="inputID" placeholder="Contoh: NRP. 12345">
             </div>
-            <button class="btn-submit" onclick="addPersonel()">＋ Masukkan ke Struktur</button>
+            <button class="btn-submit" onclick="addPersonel()">＋ Masukkan ke Koordinat Bagan</button>
             
             <div class="manager-list" id="managerList"></div>
         </div>
     </div>
 
     <script>
-        const STORAGE_KEY = "KORPASGAT_ORG_DATA";
-        const TITLE_KEY = "KORPASGAT_ORG_TITLE";
+        const STORAGE_KEY = "MANUAL_POS_ORG_DATA";
+        const TITLE_KEY = "MANUAL_POS_ORG_TITLE";
 
-        // Struktur Dummy Awal untuk Stafflog Pasgat
-        const defaultPasgatData = [
-            { level: "1", role: "Aslog Korpasgat", name: "Kolonel Pas Pasgat, S.E.", idNo: "NRP. 511223" },
-            { level: "2", role: "Pabandya Slog", name: "Letkol Pas Slog, M.Si.", idNo: "NRP. 522334" },
-            { level: "3", role: "Kaur Alpal", name: "Mayor Pas Pembekalan", idNo: "NRP. 533445" },
-            { level: "3", role: "Kaur Dallan", name: "Kapten Pas Darat Landasan", idNo: "NRP. 544556" }
+        // Template Awal dengan Penataan Posisi Baris (rowPos) & Kolom (colPos) Manual
+        const defaultManualData = [
+            { rowPos: 1, colPos: 1, role: "Aslog Korpasgat", name: "Kolonel Pas Pasgat, S.E.", idNo: "NRP. 511223" },
+            { rowPos: 2, colPos: 1, role: "Pabandya Slog", name: "Letkol Pas Slog, M.Si.", idNo: "NRP. 522334" },
+            { rowPos: 3, colPos: 1, role: "Kaur Alpal", name: "Mayor Pas Pembekalan", idNo: "NRP. 533445" },
+            { rowPos: 3, colPos: 2, role: "Kaur Dallan", name: "Kapten Pas Darat Landasan", idNo: "NRP. 544556" }
         ];
 
-        let orgData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultPasgatData;
+        let orgData = JSON.parse(localStorage.getItem(STORAGE_KEY)) || defaultManualData;
         let orgTitle = localStorage.getItem(TITLE_KEY) || "STAFF LOGISTIK KORPASGAT";
 
         function initApp() {
@@ -182,46 +184,45 @@
             renderTree();
         }
 
-        // LOGIKA PENYUSUNAN BAGAN MANUAL BERTAHAP
         function renderTree() {
             const container = document.getElementById('orgTreeContainer');
             const managerList = document.getElementById('managerList');
             container.innerHTML = '';
             if(managerList) managerList.innerHTML = '';
 
-            const levels = {
-                1: orgData.filter(item => item.level === "1"),
-                2: orgData.filter(item => item.level === "2"),
-                3: orgData.filter(item => item.level === "3")
-            };
+            // Looping membuat maksimal 4 tingkat baris vertikal kedalaman
+            for (let r = 1; r <= 4; r++) {
+                // Saring person yang berada di baris ini, lalu urutkan mendatar berdasarkan kolom (colPos)
+                const rowData = orgData.filter(item => parseInt(item.rowPos) === r);
+                rowData.sort((a, b) => parseInt(a.colPos) - parseInt(b.colPos));
 
-            [1, 2, 3].forEach(lvl => {
-                if (levels[lvl].length > 0) {
-                    const row = document.createElement('div');
-                    row.className = 'row';
+                if (rowData.length > 0) {
+                    const rowDiv = document.createElement('div');
+                    rowDiv.className = `row row-idx-${r}`;
                     
-                    levels[lvl].forEach(person => {
+                    rowData.forEach(person => {
                         const card = document.createElement('div');
-                        card.className = `card level-${lvl}`;
+                        card.className = 'card';
                         card.innerHTML = `
                             <div class="role">${person.role}</div>
                             <div class="name">${person.name}</div>
                             <div class="id-number">${person.idNo || ''}</div>
                         `;
-                        row.appendChild(card);
+                        rowDiv.appendChild(card);
                     });
-                    container.appendChild(row);
+                    container.appendChild(rowDiv);
                 }
-            });
+            }
 
-            // Management list di panel setting
+            // Daftarkan ke pengaturan panel manager agar bisa dipantau koordinatnya
             orgData.forEach((person, index) => {
                 if(managerList) {
                     const item = document.createElement('div');
                     item.className = 'manager-item';
                     item.innerHTML = `
                         <div class="manager-item-text">
-                            <strong style="color:#f97316;">Lvl ${person.level} - ${person.role}</strong><br>${person.name}
+                            <span style="background:#f97316; color:white; padding:2px 6px; border-radius:4px; font-size:11px; font-weight:bold;">B-${person.rowPos} | U-${person.colPos}</span> 
+                            <strong style="margin-left:5px;">${person.role}</strong> - ${person.name}
                         </div>
                         <button class="btn-delete" onclick="deletePersonel(${index})">Hapus</button>
                     `;
@@ -231,25 +232,28 @@
         }
 
         function addPersonel() {
-            const level = document.getElementById('inputLevel').value;
+            const rowPos = parseInt(document.getElementById('inputRowPos').value);
+            const colPos = parseInt(document.getElementById('inputColPos').value) || 1;
             const role = document.getElementById('inputRole').value.trim();
             const name = document.getElementById('inputName').value.trim();
             const idNo = document.getElementById('inputID').value.trim();
 
             if (!role || !name) {
-                return alert("Pangkat/Nama Lengkap dan Jabatan wajib diisi!");
+                return alert("Jabatan dan Nama Personel wajib diisi!");
             }
 
-            orgData.push({ level, role, name, idNo });
+            orgData.push({ rowPos, colPos, role, name, idNo });
             saveData();
             
+            // Reset form input jabatan
             document.getElementById('inputRole').value = '';
             document.getElementById('inputName').value = '';
             document.getElementById('inputID').value = '';
+            document.getElementById('inputColPos').value = '1';
         }
 
         function deletePersonel(index) {
-            if (confirm("Keluarkan personel ini dari daftar bagan?")) {
+            if (confirm("Hapus person ini dari koordinat bagan?")) {
                 orgData.splice(index, 1);
                 saveData();
             }
