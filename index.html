@@ -67,49 +67,67 @@
         .staff-divisions-container { display: flex; justify-content: center; gap: 60px; position: relative; padding-top: 20px; }
 
         
+/* ==================== PERBAIKAN JALUR GARIS HUBUNG ==================== */
 
-        /* GARIS HUBUNG UTAMA DARI ASLOG KE PARA PABANDYA */
+/* 1. HAPUS ATAU GANTI GARIS HORIZONTAL LAMA YANG MEMANJANG */
+.staff-divisions-container::before {
+    display: none; /* Mematikan garis horizontal lama yang berlebih */
+}
 
-        .staff-divisions-container::before {
+/* 2. GARIS VERTIKAL TURUN DARI ASLOG (TETAP DI TENGAH) */
+.top-leader-row::after {
+    content: ''; 
+    position: absolute; 
+    bottom: -40px; 
+    left: 50%; 
+    width: 3px; 
+    height: 40px; 
+    background-color: #f97316; 
+    transform: translateX(-50%);
+    z-index: 1;
+}
 
-            content: ''; position: absolute; top: -20px; left: 5%; right: 5%; height: 3px; background-color: #f97316;
+/* 3. MEMBUAT GARIS HORIZONTAL YANG PAS SESUAI JUMLAH KOLOM */
+.division-column::before {
+    content: ''; 
+    position: absolute; 
+    top: -40px; /* Sejajar dengan ujung bawah garis Aslog */
+    left: 50%;
+    width: 100%; /* Membentang selebar kolom */
+    height: 43px; /* Total tinggi mencakup garis horizontal dan vertikal turun */
+    
+    /* Membuat bentuk huruf L terbalik atau T menggunakan border */
+    border-top: 3px solid #f97316;
+    border-left: 3px solid #f97316;
+    transform: translateX(-50%);
+    z-index: 0;
+}
 
-        }
+/* 4. MERAPIKAN UJUNG KIRI DAN KANAN AGAR GARIS TIDAK MENONJOL KELUAR */
+.staff-divisions-container .division-column:first-child::before {
+    width: 50%;
+    left: 50%;
+    transform: none;
+    border-left: 3px solid #f97316;
+}
 
-        .top-leader-row::after {
+.staff-divisions-container .division-column:last-child::before {
+    width: 50%;
+    left: 0;
+    transform: none;
+    border-left: none;
+    border-right: 3px solid #f97316;
+}
 
-            content: ''; position: absolute; bottom: -40px; left: 50%; width: 3px; height: 40px; background-color: #f97316; transform: translateX(-50%);
-
-        }
-
-
-
-        /* SATUAN GRUP KOLOM KEBANDUAN (PABANDYA + STAFNYA) */
-
-        .division-column { display: flex; flex-direction: column; align-items: center; gap: 30px; position: relative; }
-
-        
-
-        /* Garis vertikal pendek penghubung dari garis horizontal ke kepala Pabandya */
-
-        .division-column::before {
-
-            content: ''; position: absolute; top: -40px; width: 3px; height: 40px; background-color: #f97316;
-
-        }
-
-
-
-        /* GARIS HUBUNG VERTIKAL INTERNAL ANTARA PABANDYA KE KAUR-KAURNYA */
-
-        .sub-staff-row { display: flex; flex-direction: column; align-items: center; gap: 20px; position: relative; padding-top: 20px; width: 100%; }
-
-        .sub-staff-row::before {
-
-            content: ''; position: absolute; top: -10px; left: 50%; width: 3px; height: 30px; background-color: #0284c7; transform: translateX(-50%);
-
-        }
-
+/* JIKA HANYA ADA 1 KOLOM AKTIF, HAPUS GARIS HORIZONTALNYA */
+.staff-divisions-container .division-column:only-child::before {
+    width: 3px;
+    height: 40px;
+    border: none;
+    background-color: #f97316;
+    left: 50%;
+    transform: translateX(-50%);
+}
 
 
         /* KOTAK JABATAN (CARD) */
