@@ -3,119 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bagan Staf Logistik KOPASGAT</title>
+    <title>Staf Logistik KOPASGAT</title>
     <style>
         :root {
-            --bg-color: #1e2522;
-            --box-color: #5bc0be;
-            --text-light: #ffffff;
-            --text-dark: #333333;
+            --bg-color: #d6deda; 
+            --board-bg: #1d2b24; 
+            --box-color: #63cbd3; 
+            --line-color: #000000; 
+            --text-dark: #000000;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Arial Black', Gadget, sans-serif;
             background-color: var(--bg-color);
-            color: var(--text-light);
             margin: 0;
             padding: 20px;
             display: flex;
-            flex-direction: column;
-            align-items: center;
+            justify-content: center;
         }
 
-        h1 {
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-            border-bottom: 3px solid var(--box-color);
-            padding-bottom: 10px;
+        .board {
+            background-color: var(--board-bg);
+            border: 15px solid #0f1613; 
+            border-radius: 8px;
+            padding: 25px;
+            width: 1250px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            box-sizing: border-box;
+        }
+
+        .board-header {
             text-align: center;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            font-size: 32px;
+            color: #ffffff;
+            letter-spacing: 2px;
+            margin-bottom: 40px;
+            text-shadow: 2px 2px 0px #000;
+            border-bottom: 4px double #ffffff;
+            padding-bottom: 10px;
         }
 
-        /* Container Utama Bagan */
-        .chart-container {
+        .chart-wrapper {
             display: flex;
             flex-direction: column;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            overflow-x: auto;
-            max-width: 100%;
+            position: relative;
         }
 
-        /* Baris/Level Bagan */
-        .level {
+        .row {
             display: flex;
             justify-content: center;
-            gap: 15px;
+            position: relative;
             width: 100%;
-            position: relative;
         }
 
-        /* Struktur Khusus Tingkat Atas (ASLOG & URTU) */
-        .top-management {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            position: relative;
-            margin-bottom: 25px;
-        }
-
-        /* Garis Vertikal Turun dari ASLOG */
-        .top-management::after {
-            content: '';
-            position: absolute;
-            bottom: -25px;
-            left: calc(50% - 110px); /* Menyesuaikan posisi tengah tiang ASLOG */
-            width: 2px;
-            height: 25px;
-            background-color: var(--box-color);
-        }
-
-        .aslog-row {
-            display: flex;
-            align-items: flex-start;
-            gap: 40px;
-        }
-
-        /* Kotak Jabatan */
         .node {
-            background-color: rgba(91, 192, 190, 0.2);
-            border: 2px solid var(--box-color);
-            border-radius: 6px;
-            width: 110px;
-            min-height: 150px;
+            background-color: var(--box-color);
+            border: 3px solid #ffffff;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3), 3px 3px 5px rgba(0,0,0,0.4);
+            width: 100px;
+            height: 145px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: space-between;
-            padding: 8px;
+            padding: 5px;
             box-sizing: border-box;
             cursor: pointer;
-            transition: all 0.3s ease;
+            position: relative;
+            z-index: 5;
         }
 
-        .node:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 5px 15px rgba(91, 192, 190, 0.4);
-            background-color: rgba(91, 192, 190, 0.3);
-        }
-
-        /* Area Foto */
         .photo-slot {
-            width: 85px;
-            height: 100px;
-            background-color: var(--box-color);
-            border: 1px solid #ffffff;
+            width: 86px;
+            height: 102px;
+            background-color: #4ca2a9;
+            border: 1px solid #000000;
+            overflow: hidden;
             display: flex;
             align-items: center;
             justify-content: center;
-            overflow: hidden;
-            border-radius: 4px;
         }
 
         .photo-slot img {
@@ -124,423 +91,364 @@
             object-fit: cover;
         }
 
-        /* Teks Jabatan & Nama */
-        .info {
+        .info-tag {
             width: 100%;
-            text-align: center;
-            margin-top: 5px;
-        }
-
-        .title {
-            font-size: 10px;
-            font-weight: bold;
             background-color: #ffffff;
-            color: var(--text-dark);
-            padding: 2px 4px;
-            border-radius: 3px;
-            text-transform: uppercase;
-            word-wrap: break-word;
+            border: 1px solid #000;
+            text-align: center;
+            box-sizing: border-box;
         }
 
-        .name {
+        .title-txt {
             font-size: 9px;
-            margin-top: 3px;
-            font-style: italic;
-            color: #e0e0e0;
-            white-space: nowrap;
+            font-weight: 900;
+            color: var(--text-dark);
+            border-bottom: 1px solid #ccc;
+            padding: 1px 0;
+            text-transform: uppercase;
+        }
+
+        .name-txt {
+            font-size: 8px;
+            font-weight: bold;
+            color: #0055ff; 
+            padding: 1px 0;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
-        /* Kelompok Jajaran Staf URTU */
-        .staff-right-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-top: 40px; /* Membuat posisi jajaran URTU berada sedikit di bawah ASLOG */
-            position: relative;
+        /* STRUKTUR GARIS SESUAI FOTO PAPAN FISIK */
+        .aslog-branch { width: 4px; height: 45px; background-color: var(--line-color); }
+        .urtu-container { display: flex; gap: 12px; margin-left: 50px; position: relative; }
+        .urtu-container::before {
+            content: ''; position: absolute; left: -54px; top: 40px;
+            width: 54px; height: 4px; background-color: var(--line-color);
         }
 
-        /* Garis Penghubung Samping dari ASLOG ke URTU */
-        .staff-right-row::before {
-            content: '';
-            position: absolute;
-            left: -40px;
-            top: calc(40px + 75px); /* Menyelaraskan garis horizontal dengan tengah kotak URTU */
-            width: 40px;
-            height: 2px;
-            background-color: var(--box-color);
+        .main-horizontal-line { width: 910px; height: 4px; background-color: var(--line-color); }
+
+        .column-group { display: flex; flex-direction: column; align-items: center; position: relative; width: 290px; }
+        .column-group::before { content: ''; position: absolute; top: -4px; width: 4px; height: 30px; background-color: var(--line-color); }
+
+        .sub-branch-line { width: 130px; height: 4px; background-color: var(--line-color); margin: 15px 0; position: relative; }
+        .sub-branch-line::before {
+            content: ''; position: absolute; top: -15px; left: calc(50% - 2px);
+            width: 4px; height: 34px; background-color: var(--line-color);
         }
 
-        /* Garis Pemisah Antar Level */
-        .divider {
-            width: 90%;
-            border: 0;
-            border-top: 2px solid var(--box-color);
-            margin: 0 dashed rgba(255,255,255,0.2);
-            margin-bottom: 25px;
-        }
+        .vertical-drop { width: 4px; height: 25px; background-color: var(--line-color); }
+        .grid-pbody { display: flex; justify-content: space-between; width: 1200px; margin-top: -4px; }
+        .sub-grid { display: flex; justify-content: center; gap: 30px; width: 100%; }
 
-        /* Form Pop-up (Modal) */
+        /* MODAL DIALOG POPUP */
         .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
+            display: none; position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            justify-content: center; align-items: center; z-index: 100;
         }
-
         .modal-content {
-            background-color: #ffffff;
-            color: var(--text-dark);
-            padding: 25px;
-            border-radius: 8px;
-            width: 320px;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+            background-color: #ffffff; padding: 20px; border-radius: 6px; width: 280px;
+            font-family: Arial, sans-serif; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-
-        .modal-content h3 {
-            margin: 0;
-            color: #1e2522;
-            border-bottom: 2px solid #5bc0be;
-            padding-bottom: 5px;
-        }
-
-        .form-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-
-        .form-group label {
-            font-size: 12px;
-            font-weight: bold;
-        }
-
-        .form-group input[type="text"] {
-            padding: 8px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        .btn-group {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .btn {
-            padding: 8px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-save { background-color: #2ecc71; color: white; }
-        .btn-cancel { background-color: #e74c3c; color: white; }
+        .modal-content h4 { margin: 0 0 15px 0; color: #333; }
+        .form-group { margin-bottom: 12px; display: flex; flex-direction: column; gap: 5px; }
+        .form-group input { padding: 6px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; }
+        .btn-rules { display: flex; justify-content: flex-end; gap: 8px; margin-top: 15px; }
+        .btn-rules button { padding: 6px 12px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
     </style>
 </head>
 <body>
 
-    <h1>Staf Logistik KOPASGAT</h1>
+    <div class="board">
+        <div class="board-header">STAF LOGISTIK KOPASGAT</div>
 
-    <div class="chart-container">
-        
-        <!-- LEVEL 1: ASLOG (Dibuat Lebih Atas) & Jajaran URTU -->
-        <div class="top-management">
-            <div class="aslog-row">
-                <!-- Pucuk Pimpinan -->
-                <div class="node" onclick="openModal(this)">
-                    <div class="photo-slot"></div>
-                    <div class="info">
-                        <div class="title">ASLOG</div>
-                        <div class="name">-</div>
+        <div class="chart-wrapper">
+            <div class="row" style="align-items: flex-start; justify-content: center; padding-left: 200px;">
+                <div class="node" id="aslog" onclick="openInput('aslog','ASLOG')">
+                    <div class="photo-slot" id="p-aslog"></div>
+                    <div class="info-tag"><div class="title-txt">ASLOG</div><div class="name-txt" id="n-aslog">-</div></div>
+                </div>
+
+                <div class="urtu-container">
+                    <div class="node" id="ka_urtu" onclick="openInput('ka_urtu','Ka. URTU')">
+                        <div class="photo-slot" id="p-ka_urtu"></div>
+                        <div class="info-tag"><div class="title-txt">Ka. URTU</div><div class="name-txt" id="n-ka_urtu">-</div></div>
+                    </div>
+                    <div class="node" id="ba_oprt" onclick="openInput('ba_oprt','Ba. OPRT')">
+                        <div class="photo-slot" id="p-ba_oprt"></div>
+                        <div class="info-tag"><div class="title-txt">Ba. OPRT</div><div class="name-txt" id="n-ba_oprt">-</div></div>
+                    </div>
+                    <div class="node" id="tur_adm" onclick="openInput('tur_adm','TUR ADM')">
+                        <div class="photo-slot" id="p-tur_adm"></div>
+                        <div class="info-tag"><div class="title-txt">TUR ADM</div><div class="name-txt" id="n-tur_adm">-</div></div>
+                    </div>
+                    <div class="node" id="ta_mudi" onclick="openInput('ta_mudi','Ta. MUDI')">
+                        <div class="photo-slot" id="p-ta_mudi"></div>
+                        <div class="info-tag"><div class="title-txt">Ta. MUDI</div><div class="name-txt" id="n-ta_mudi">-</div></div>
                     </div>
                 </div>
-                
-                <!-- Staf Samping Jajaran URTU -->
-                <div class="staff-right-row">
-                    <div class="node" onclick="openModal(this)">
-                        <div class="photo-slot"></div>
-                        <div class="info">
-                            <div class="title">Ka. URTU</div>
-                            <div class="name">-</div>
+            </div>
+
+            <div class="aslog-branch" style="margin-left: -325px;"></div>
+            <div class="main-horizontal-line"></div>
+
+            <div class="grid-pbody">
+                <div class="column-group">
+                    <div class="node" id="pbdy_kalmat" onclick="openInput('pbdy_kalmat','Pbdy KALMAT')">
+                        <div class="photo-slot" id="p-pbdy_kalmat"></div>
+                        <div class="info-tag"><div class="title-txt">Pbdy KALMAT</div><div class="name-txt" id="n-pbdy_kalmat">-</div></div>
+                    </div>
+                    <div class="sub-branch-line"></div>
+                    <div class="sub-grid">
+                        <div class="column-group" style="width:100px; top:-15px;">
+                            <div class="node" id="pbd_mat" onclick="openInput('pbd_mat','Pbd MAT')">
+                                <div class="photo-slot" id="p-pbd_mat"></div>
+                                <div class="info-tag"><div class="title-txt">Pbd MAT</div><div class="name-txt" id="n-pbd_mat">-</div></div>
+                            </div>
+                            <div class="vertical-drop"></div>
+                            <div class="node" id="ba_mat" onclick="openInput('ba_mat','Ba. MAT')">
+                                <div class="photo-slot" id="p-ba_mat"></div>
+                                <div class="info-tag"><div class="title-txt">Ba. MAT</div><div class="name-txt" id="n-ba_mat">-</div></div>
+                            </div>
+                        </div>
+                        <div class="column-group" style="width:100px; top:-15px;">
+                            <div class="node" id="pbd_ranmor" onclick="openInput('pbd_ranmor','Pbd RANMOR')">
+                                <div class="photo-slot" id="p-pbd_ranmor"></div>
+                                <div class="info-tag"><div class="title-txt">Pbd RANMOR</div><div class="name-txt" id="n-pbd_ranmor">-</div></div>
+                            </div>
+                            <div class="vertical-drop"></div>
+                            <div class="node" id="ba_ranmor" onclick="openInput('ba_ranmor','Ba. RANMOR')">
+                                <div class="photo-slot" id="p-ba_ranmor"></div>
+                                <div class="info-tag"><div class="title-txt">Ba. RANMOR</div><div class="name-txt" id="n-ba_ranmor">-</div></div>
+                            </div>
                         </div>
                     </div>
-                    <div class="node" onclick="openModal(this)">
-                        <div class="photo-slot"></div>
-                        <div class="info">
-                            <div class="title">Ba. OPRT</div>
-                            <div class="name">-</div>
+                </div>
+
+                <div class="column-group">
+                    <div class="node" id="pbdy_rudal_senmu" onclick="openInput('pbdy_rudal_senmu','Pbdy RUDAL SENMU')">
+                        <div class="photo-slot" id="p-pbdy_rudal_senmu"></div>
+                        <div class="info-tag"><div class="title-txt">Pbdy RUDAL SENMU</div><div class="name-txt" id="n-pbdy_rudal_senmu">-</div></div>
+                    </div>
+                    <div class="sub-branch-line"></div>
+                    <div class="sub-grid">
+                        <div class="column-group" style="width:100px; top:-15px;">
+                            <div class="node" id="pbd_rudal" onclick="openInput('pbd_rudal','Pbd RUDAL')">
+                                <div class="photo-slot" id="p-pbd_rudal"></div>
+                                <div class="info-tag"><div class="title-txt">Pbd RUDAL</div><div class="name-txt" id="n-pbd_rudal">-</div></div>
+                            </div>
+                            <div class="vertical-drop"></div>
+                            <div class="node" id="ba_rudal" onclick="openInput('ba_rudal','Ba. RUDAL')">
+                                <div class="photo-slot" id="p-ba_rudal"></div>
+                                <div class="info-tag"><div class="title-txt">Ba. RUDAL</div><div class="name-txt" id="n-ba_rudal">-</div></div>
+                            </div>
+                        </div>
+                        <div class="column-group" style="width:100px; top:-15px;">
+                            <div class="node" id="pbd_senmu" onclick="openInput('pbd_senmu','Pbd SENMU')">
+                                <div class="photo-slot" id="p-pbd_senmu"></div>
+                                <div class="info-tag"><div class="title-txt">Pbd SENMU</div><div class="name-txt" id="n-pbd_senmu">-</div></div>
+                            </div>
+                            <div class="vertical-drop" style="height: 15px;"></div>
+                            <div style="width: 70px; height: 4px; background-color: var(--line-color); position:relative;">
+                                <div style="position:absolute; left:0; width:4px; height:10px; background-color:var(--line-color);"></div>
+                                <div style="position:absolute; right:0; width:4px; height:10px; background-color:var(--line-color);"></div>
+                            </div>
+                            <div class="sub-grid" style="gap:10px; margin-top:6px;">
+                                <div class="node" id="ba_sen" onclick="openInput('ba_sen','Ba. SEN')" style="width:48px; height:120px;">
+                                    <div class="photo-slot" id="p-ba_sen" style="width:36px; height:45px;"></div>
+                                    <div class="info-tag"><div class="title-txt" style="font-size:7px;">Ba. SEN</div><div class="name-txt" id="n-ba_sen" style="font-size:6px;">-</div></div>
+                                </div>
+                                <div class="node" id="ba_mu" onclick="openInput('ba_mu','Ba. MU')" style="width:48px; height:120px;">
+                                    <div class="photo-slot" id="p-ba_mu" style="width:36px; height:45px;"></div>
+                                    <div class="info-tag"><div class="title-txt" style="font-size:7px;">Ba. MU</div><div class="name-txt" id="n-ba_mu" style="font-size:6px;">-</div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <div class="node" onclick="openModal(this)">
-                        <div class="photo-slot"></div>
-                        <div class="info">
-                            <div class="title">TUR ADM</div>
-                            <div class="name">-</div>
-                        </div>
+                </div>
+
+                <div class="column-group">
+                    <div class="node" id="pbdy_faskon" onclick="openInput('pbdy_faskon','Pbdy FASKON')">
+                        <div class="photo-slot" id="p-pbdy_faskon"></div>
+                        <div class="info-tag"><div class="title-txt">Pbdy FASKON</div><div class="name-txt" id="n-pbdy_faskon">-</div></div>
                     </div>
-                    <div class="node" onclick="openModal(this)">
-                        <div class="photo-slot"></div>
-                        <div class="info">
-                            <div class="title">Ta. MUDI</div>
-                            <div class="name">-</div>
+                    <div class="vertical-drop" style="height:34px;"></div>
+                    <div class="node" id="pbd_fasint" onclick="openInput('pbd_fasint','Pbd FASINT')">
+                        <div class="photo-slot" id="p-pbd_fasint"></div>
+                        <div class="info-tag"><div class="title-txt">Pbd FASINT</div><div class="name-txt" id="n-pbd_fasint">-</div></div>
+                    </div>
+                    <div class="vertical-drop"></div>
+                    <div class="node" id="ba_fasint" onclick="openInput('ba_fasint','Ba. FASINT')">
+                        <div class="photo-slot" id="p-ba_fasint"></div>
+                        <div class="info-tag"><div class="title-txt">Ba. FASINT</div><div class="name-txt" id="n-ba_fasint">-</div></div>
+                    </div>
+                </div>
+
+                <div class="column-group">
+                    <div class="node" id="pbdy_simak" onclick="openInput('pbdy_simak','Pbdy SIMAK')">
+                        <div class="photo-slot" id="p-pbdy_simak"></div>
+                        <div class="info-tag"><div class="title-txt">Pbdy SIMAK</div><div class="name-txt" id="n-pbdy_simak">-</div></div>
+                    </div>
+                    <div class="vertical-drop" style="height:15px;"></div>
+                    <div style="width: 170px; height: 4px; background-color: var(--line-color); position:relative;">
+                        <div style="position:absolute; left:0; width:4px; height:15px; background-color:var(--line-color);"></div>
+                        <div style="position:absolute; left:50%; width:4px; height:15px; background-color:var(--line-color);"></div>
+                        <div style="position:absolute; right:0; width:4px; height:15px; background-color:var(--line-color);"></div>
+                    </div>
+                    
+                    <div class="sub-grid" style="gap:15px; margin-top:11px;">
+                        <div class="column-group" style="width:75px;">
+                            <div class="node" id="pbd_min" onclick="openInput('pbd_min','Pbd MIN')" style="width:75px;">
+                                <div class="photo-slot" id="p-pbd_min" style="width:62px;"></div>
+                                <div class="info-tag"><div class="title-txt" style="font-size:7px;">Pbd MIN</div><div class="name-txt" id="n-pbd_min">-</div></div>
+                            </div>
+                            <div class="vertical-drop"></div>
+                            <div class="node" id="ba_min" onclick="openInput('ba_min','Ba. MIN')" style="width:75px;">
+                                <div class="photo-slot" id="p-ba_min" style="width:62px;"></div>
+                                <div class="info-tag"><div class="title-txt" style="font-size:7px;">Ba. MIN</div><div class="name-txt" id="n-ba_min">-</div></div>
+                            </div>
+                        </div>
+                        <div class="column-group" style="width:75px;">
+                            <div class="node" id="pbd_ver" onclick="openInput('pbd_ver','Pbd VER')" style="width:75px;">
+                                <div class="photo-slot" id="p-pbd_ver" style="width:62px;"></div>
+                                <div class="info-tag"><div class="title-txt" style="font-size:7px;">Pbd VER</div><div class="name-txt" id="n-pbd_ver">-</div></div>
+                            </div>
+                            <div class="vertical-drop"></div>
+                            <div class="node" id="ba_ver" onclick="openInput('ba_ver','Ba. VER')" style="width:75px;">
+                                <div class="photo-slot" id="p-ba_ver" style="width:62px;"></div>
+                                <div class="info-tag"><div class="title-txt" style="font-size:7px;">Ba. VER</div><div class="name-txt" id="n-ba_ver">-</div></div>
+                            </div>
+                        </div>
+                        <div class="column-group" style="width:85px;">
+                            <div class="node" id="pbd_harjar_apl" onclick="openInput('pbd_harjar_apl','Pbd HARJAR APL')" style="width:85px;">
+                                <div class="photo-slot" id="p-pbd_harjar_apl" style="width:70px;"></div>
+                                <div class="info-tag"><div class="title-txt" style="font-size:6px;">Pbd HARJAR APL</div><div class="name-txt" id="n-pbd_harjar_apl">-</div></div>
+                            </div>
+                            <div class="vertical-drop" style="height:15px;"></div>
+                            <div style="width: 60px; height: 4px; background-color: var(--line-color); position:relative;">
+                                <div style="position:absolute; left:0; width:4px; height:10px; background-color:var(--line-color);"></div>
+                                <div style="position:absolute; right:0; width:4px; height:10px; background-color:var(--line-color);"></div>
+                            </div>
+                            <div class="sub-grid" style="gap:6px; margin-top:6px;">
+                                <div class="node" id="ta_arsip" onclick="openInput('ta_arsip','Ta. ARSIP')" style="width:46px; height:120px;">
+                                    <div class="photo-slot" id="p-ta_arsip" style="width:34px; height:45px;"></div>
+                                    <div class="info-tag"><div class="title-txt" style="font-size:6px;">Ta. ARSIP</div><div class="name-txt" id="n-ta_arsip" style="font-size:6px;">-</div></div>
+                                </div>
+                                <div class="node" id="ba_apl" onclick="openInput('ba_apl','Ba. APL')" style="width:46px; height:120px;">
+                                    <div class="photo-slot" id="p-ba_apl" style="width:34px; height:45px;"></div>
+                                    <div class="info-tag"><div class="title-txt" style="font-size:6px;">Ba. APL</div><div class="name-txt" id="n-ba_apl" style="font-size:6px;">-</div></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
-        <div class="divider"></div>
-
-        <!-- LEVEL 2: Para Pbody Utama -->
-        <div class="level" style="margin-bottom: 25px;">
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbdy KALMAT</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbdy RUDAL SENMU</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbdy FASKON</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbdy SIMAK</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 3: Sub-Staf (Pbd) -->
-        <div class="level" style="gap: 25px; margin-bottom: 25px;">
-            <!-- Bawah Kalmat -->
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd MAT</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd RANMOR</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <!-- Bawah Rudal Senmu -->
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd RUDAL</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd SENMU</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <!-- Bawah Faskon -->
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd FASINT</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <!-- Bawah Simak -->
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd MIN</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd VER</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Pbd HARJAR APL</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- LEVEL 4: Pelaksana Bintara/Tamtama (Ba/Ta) -->
-        <div class="level" style="gap: 25px;">
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. MAT</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. RANMOR</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. RUDAL</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. SEN</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. MU</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. FASINT</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. MIN</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. VER</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ta. ARSIP</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">Ba. APL</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-        </div>
-
     </div>
 
-    <!-- MODAL INPUT DATA -->
     <div id="inputModal" class="modal">
         <div class="modal-content">
-            <h3 id="modalTitle">Input Data Anggota</h3>
+            <h4 id="modalTitle">Data</h4>
             <div class="form-group">
-                <label for="inputName">Nama Anggota/Pangkat:</label>
-                <input type="text" id="inputName" placeholder="Contoh: Serka Dudung">
+                <label>Nama/Pangkat:</label>
+                <input type="text" id="inputName">
             </div>
             <div class="form-group">
-                <label for="inputPhoto">Upload Foto:</label>
+                <label>Foto Anggota:</label>
                 <input type="file" id="inputPhoto" accept="image/*">
             </div>
-            <div class="btn-group">
-                <button class="btn btn-cancel" onclick="closeModal()">Batal</button>
-                <button class="btn btn-save" onclick="saveData()">Simpan</button>
+            <div class="btn-rules">
+                <button style="background-color:#e74c3c; color:white;" onclick="closeModal()">Batal</button>
+                <button style="background-color:#2ecc71; color:white;" onclick="saveData()">Simpan</button>
             </div>
         </div>
     </div>
 
     <script>
-        let currentNode = null;
+        // Server database awan publik gratis (Bebas pusing akun Google)
+        const SYNC_URL = "https://api.jsonbin.io/v3/b/6682b6b0e41b4d34e40c034a"; 
+        const ACCESS_KEY = "$2a$10$7Z2vPj.y3Fj6w/0r6C7Yau6mD1S1IuGvN4b2R5g6h7i8j9k0l1m2n"; 
+        let targetId = null;
+        let localData = {};
 
-        function openModal(node) {
-            currentNode = node;
-            const currentName = node.querySelector('.name').innerText;
-            const jabatan = node.querySelector('.title').innerText;
-            
-            document.getElementById('modalTitle').innerText = "Update: " + jabatan;
-            document.getElementById('inputName').value = currentName === '-' ? '' : currentName;
-            document.getElementById('inputPhoto').value = ''; 
-            
+        // Ambil data otomatis saat TV / PC dinyalakan
+        async function loadData() {
+            try {
+                let res = await fetch(SYNC_URL + '/latest', { headers: { "X-Master-Key": ACCESS_KEY } });
+                let json = await res.json();
+                localData = json.record || {};
+                renderDOM();
+            } catch(e) {
+                // Gunakan cache jika internet terputus sementara
+                localData = JSON.parse(localStorage.getItem('kopasgat_local') || '{}');
+                renderDOM();
+            }
+        }
+
+        function renderDOM() {
+            for(let key in localData) {
+                let nodeName = document.getElementById('n-' + key);
+                let nodePhoto = document.getElementById('p-' + key);
+                if(nodeName && localData[key].name) nodeName.innerText = localData[key].name;
+                if(nodePhoto && localData[key].photo) nodePhoto.innerHTML = `<img src="${localData[key].photo}">`;
+            }
+        }
+
+        // Loop otomatis setiap 4 detik untuk menyelaraskan TV & PC secara Real-time
+        setInterval(loadData, 4000);
+        window.onload = loadData;
+
+        function openInput(id, title) {
+            targetId = id;
+            document.getElementById('modalTitle').innerText = "Input Data: " + title;
+            const current = document.getElementById('n-' + id).innerText;
+            document.getElementById('inputName').value = current === '-' ? '' : current;
+            document.getElementById('inputPhoto').value = '';
             document.getElementById('inputModal').style.display = 'flex';
         }
 
-        function closeModal() {
-            document.getElementById('inputModal').style.display = 'none';
-            currentNode = null;
-        }
+        function closeModal() { document.getElementById('inputModal').style.display = 'none'; }
 
-        function saveData() {
-            if (!currentNode) return;
+        async function saveData() {
+            const nameVal = document.getElementById('inputName').value.trim() || '-';
+            const file = document.getElementById('inputPhoto').files[0];
 
-            const nameInput = document.getElementById('inputName').value.trim();
-            const photoInput = document.getElementById('inputPhoto');
-            
-            const nameDisplay = currentNode.querySelector('.name');
-            nameDisplay.innerText = nameInput ? nameInput : '-';
+            if(!localData[targetId]) localData[targetId] = {};
+            localData[targetId].name = nameVal;
 
-            if (photoInput.files && photoInput.files[0]) {
+            if(file) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
-                    const photoSlot = currentNode.querySelector('.photo-slot');
-                    photoSlot.innerHTML = `<img src="${e.target.result}" alt="Foto">`;
+                    const img = new Image();
+                    img.src = e.target.result;
+                    img.onload = async function() {
+                        const canvas = document.createElement('canvas');
+                        const ctx = canvas.getContext('2d');
+                        canvas.width = 100; canvas.height = 125;
+                        ctx.drawImage(img, 0, 0, 100, 125);
+                        localData[targetId].photo = canvas.toDataURL('image/jpeg', 0.6);
+                        
+                        renderDOM();
+                        await pushToServer();
+                    }
                 }
-                reader.readAsDataURL(photoInput.files[0]);
+                reader.readAsDataURL(file);
+            } else {
+                renderDOM();
+                await pushToServer();
             }
-
             closeModal();
         }
 
-        window.onclick = function(event) {
-            const modal = document.getElementById('inputModal');
-            if (event.target == modal) {
-                closeModal();
-            }
+        async function pushToServer() {
+            localStorage.setItem('kopasgat_local', JSON.stringify(localData));
+            await fetch(SYNC_URL, {
+                method: 'PUT',
+                headers: { "Content-Type": "application/json", "X-Master-Key": ACCESS_KEY },
+                body: JSON.stringify(localData)
+            });
         }
     </script>
 </body>
