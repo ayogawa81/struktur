@@ -3,483 +3,490 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Struktur Organisasi - Korpasgat Column Layout</title>
+    <title>Bagan Staf Logistik KOPASGAT</title>
     <style>
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        :root {
+            --bg-color: #1e2522;
+            --box-color: #5bc0be;
+            --text-light: #ffffff;
+            --text-dark: #333333;
         }
+
         body {
-            background-color: #0b1329; color: #f8fafc; min-height: 100vh;
-            display: flex; flex-direction: column; overflow-x: auto; position: relative;
-        }
-        header {
-            background: linear-gradient(90deg, #1c2541, #0b1329);
-            padding: 20px 40px; display: flex; justify-content: space-between;
-            align-items: center; border-bottom: 4px solid #f97316;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-            width: 100%; position: sticky; top: 0; z-index: 10;
-        }
-        .logo-title h1 { font-size: 2rem; font-weight: 800; letter-spacing: 1.5px; color: #ffffff; text-transform: uppercase; }
-        .logo-title p { color: #f97316; font-size: 1rem; margin-top: 5px; font-weight: 600; letter-spacing: 0.5px; }
-        
-        /* CONTAINER STRUKTUR UTAMA */
-        main { flex: 1; padding: 40px 20px; display: flex; justify-content: center; align-items: flex-start; min-width: 1200px; }
-        .tree-container { display: flex; flex-direction: column; align-items: center; width: 100%; }
-        
-        /* BARIS UTAMA (ASLOG) */
-        .top-leader-row { display: flex; justify-content: center; margin-bottom: 40px; position: relative; width: 100%; }
-        
-        /* GRUP DIVISI DI BAWAH ASLOG */
-        .staff-divisions-container { display: flex; justify-content: center; gap: 40px; position: relative; padding-top: 20px; }
-        
-        /* KOLOM PER DIVISI */
-        .division-column {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-light);
+            margin: 0;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            position: relative;
-            gap: 30px;
         }
 
-        /* BARIS UNTUK KAUR DAN ANGGOTA STAF (YANG MEMBUAT BERJEJER HORIZONTAL) */
-        .sub-staff-row {
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 30px;
+            border-bottom: 3px solid var(--box-color);
+            padding-bottom: 10px;
+            text-align: center;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        /* Container Utama Bagan */
+        .chart-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            overflow-x: auto;
+            max-width: 100%;
+        }
+
+        /* Baris/Level Bagan */
+        .level {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            position: relative;
+            gap: 15px;
             width: 100%;
+            position: relative;
         }
 
-        /* ==================== PERBAIKAN JALUR GARIS HUBUNG ==================== */
-        /* GARIS VERTIKAL TURUN DARI ASLOG */
-        .top-leader-row::after {
-            content: ''; 
-            position: absolute; 
-            bottom: -40px; 
-            left: 50%; 
-            width: 3px; 
-            height: 40px; 
-            background-color: #f97316; 
-            transform: translateX(-50%);
-            z-index: 1;
+        /* Kotak Jabatan */
+        .node {
+            background-color: rgba(91, 192, 190, 0.2);
+            border: 2px solid var(--box-color);
+            border-radius: 6px;
+            width: 110px;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px;
+            box-sizing: border-box;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
         }
 
-        /* GARIS HORIZONTAL DI ATAS KOLOM-KOLOM */
-        .division-column::before {
-            content: ''; 
-            position: absolute; 
-            top: -20px; 
-            left: 50%;
-            width: 100%; 
-            height: 20px; 
-            border-top: 3px solid #f97316;
-            border-left: 3px solid #f97316;
-            transform: translateX(-50%);
-            z-index: 0;
+        .node:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(91, 192, 190, 0.4);
+            background-color: rgba(91, 192, 190, 0.3);
         }
 
-        .staff-divisions-container .division-column:first-child::before {
-            width: 50%;
-            left: 50%;
-            transform: none;
-            border-left: 3px solid #f97316;
+        /* Area Foto */
+        .photo-slot {
+            width: 85px;
+            height: 100px;
+            background-color: var(--box-color);
+            border: 1px solid #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border-radius: 4px;
         }
 
-        .staff-divisions-container .division-column:last-child::before {
-            width: 50%;
+        .photo-slot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        /* Teks Jabatan & Nama */
+        .info {
+            width: 100%;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        .title {
+            font-size: 10px;
+            font-weight: bold;
+            background-color: #ffffff;
+            color: var(--text-dark);
+            padding: 2px 4px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            word-wrap: break-word;
+        }
+
+        .name {
+            font-size: 9px;
+            margin-top: 3px;
+            font-style: italic;
+            color: #e0e0e0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        /* Hubungan Samping ASLOG (Sekretariat/URTU) */
+        .secretariat-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: 180px; /* Geser ke kanan sesuai struktur asli */
+        }
+
+        /* Form Pop-up (Modal) */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
             left: 0;
-            transform: none;
-            border-left: none;
-            border-right: 3px solid #f97316;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
         }
 
-        .staff-divisions-container .division-column:only-child::before {
-            width: 3px;
-            height: 20px;
+        .modal-content {
+            background-color: #ffffff;
+            color: var(--text-dark);
+            padding: 25px;
+            border-radius: 8px;
+            width: 320px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .modal-content h3 {
+            margin: 0;
+            color: #1e2522;
+            border-bottom: 2px solid #5bc0be;
+            padding-bottom: 5px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .form-group label {
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .form-group input [type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .btn {
+            padding: 8px 15px;
             border: none;
-            background-color: #f97316;
-            left: 50%;
-            transform: translateX(-50%);
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
         }
 
-        /* KOTAK JABATAN (CARD) */
-        .card {
-            background: #1c2541; border: 2px solid #3a506b; border-radius: 14px;
-            padding: 15px; width: 240px; text-align: center;
-            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.4);
-            transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; gap: 10px;
-            position: relative; z-index: 2;
-        }
-        .card:hover { border-color: #f97316; transform: translateY(-3px); }
-        
-        /* TEMA WARNA TINGKATAN JABATAN */
-        .level-1 { border-color: #f97316; background: linear-gradient(180deg, #1c2541 0%, #3a2214 100%); }
-        .level-1 .role { color: #f97316; }
-        
-        .level-2 { border-color: #0284c7; background: linear-gradient(180deg, #1c2541 0%, #132a3a 100%); }
-        .level-2 .role { color: #0284c7; }
-        
-        .level-3 { border-color: #10b981; background: linear-gradient(180deg, #1c2541 0%, #0c2e24 100%); }
-        .level-3 .role { color: #10b981; }
-        
-        .level-4 { border-color: #64748b; background-color: #111827; }
-        .level-4 .role { color: #94a3b8; }
-
-        /* FRAME FOTO PERSONEL */
-        .photo-frame {
-            width: 85px; height: 105px; border-radius: 6px;
-            border: 2px solid #3a506b; background-color: #0b1329;
-            overflow: hidden; display: flex; justify-content: center; align-items: center;
-        }
-        .level-1 .photo-frame { border-color: #f97316; }
-        .level-2 .photo-frame { border-color: #0284c7; }
-        .photo-frame img { width: 100%; height: 100%; object-fit: cover; }
-        
-        /* TEKS CARD */
-        .card-details { width: 100%; }
-        .card .role { font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 5px; font-size: 0.8rem; }
-        .card .name { font-size: 1rem; font-weight: bold; color: #ffffff; line-height: 1.3; word-break: break-word; }
-        .card .id-number { font-size: 0.75rem; color: #94a3b8; margin-top: 3px; }
-
-        /* INTERFACE PENGATURAN */
-        .btn-setting {
-            background-color: #f97316; color: #ffffff; border: none;
-            padding: 12px 20px; border-radius: 8px; cursor: pointer; font-weight: 700; 
-            transition: all 0.2s; box-shadow: 0 4px 6px rgba(249, 115, 22, 0.2);
-        }
-        .btn-setting:hover { background-color: #ea580c; }
-
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; right: 0; bottom: 0; background-color: rgba(0, 0, 0, 0.85);
-            display: flex; justify-content: center; align-items: center; z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s ease;
-        }
-        .modal-overlay.active { opacity: 1; pointer-events: auto; }
-        .modal-content { background-color: #1c2541; width: 90%; max-width: 580px; max-height: 92vh; border-radius: 16px; border: 2px solid #3a506b; padding: 25px; display: flex; flex-direction: column; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #3a506b; padding-bottom: 12px; }
-        .modal-header h2 { font-size: 1.4rem; color: #f97316; }
-        .btn-close { background: none; border: none; color: #94a3b8; font-size: 1.6rem; cursor: pointer; }
-        
-        .form-container { overflow-y: auto; flex: 1; padding-right: 5px; }
-        .form-group { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
-        .form-group label { font-size: 0.8rem; color: #cbd5e1; font-weight: 600; text-transform: uppercase; }
-        .form-group input, .form-group select { background-color: #0b1329; border: 1px solid #3a506b; color: #f8fafc; padding: 10px; border-radius: 6px; font-size: 0.95rem; width: 100%; }
-        .form-group input:focus, .form-group select:focus { border-color: #f97316; outline: none; }
-        
-        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        
-        .btn-submit { background-color: #10b981; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.95rem; text-transform: uppercase; margin-top: 5px; }
-        .btn-submit:hover { background-color: #059669; }
-        .btn-cancel-edit { background-color: #475569; color: white; border: none; padding: 12px; border-radius: 6px; font-weight: bold; cursor: pointer; width: 100%; font-size: 0.95rem; text-transform: uppercase; margin-top: 5px; display: none;}
-
-        .manager-list { border-top: 2px dashed #3a506b; padding-top: 15px; margin-top: 15px; max-height: 180px; overflow-y: auto; }
-        .manager-item { display: flex; justify-content: space-between; align-items: center; background-color: #0b1329; padding: 10px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #3a506b; gap: 10px; }
-        .manager-item-text { font-size: 0.85rem; color: #cbd5e1; flex: 1; }
-        .action-buttons { display: flex; gap: 6px; }
-        .btn-action-edit { background-color: #3b82f6; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        .btn-delete { background-color: #ef4444; color: white; border: none; padding: 6px 10px; border-radius: 4px; cursor: pointer; font-size: 0.8rem; font-weight: bold; }
-        
-        .loading-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: #0b1329; display: flex; justify-content: center; align-items: center; z-index: 9999; font-size: 1.5rem; font-weight: bold; color: #f97316; transition: opacity 0.5s ease; }
+        .btn-save { background-color: #2ecc71; color: white; }
+        .btn-cancel { background-color: #e74c3c; color: white; }
     </style>
 </head>
 <body>
 
-    <div class="loading-overlay" id="loadingView">📡 Menghubungkan ke Server nPoint Cloud...</div>
+    <h1>Staf Logistik KOPASGAT</h1>
 
-    <header>
-        <div class="logo-title">
-            <h1 id="titleDisplay">STAFF LOGISTIK KORPASGAT</h1>
-            <p>KOMANDO DAERAH - KORPS PASUKAN GERAK CEPAT</p>
-        </div>
-        <button class="btn-setting" onclick="toggleModal(true)">⚙️ Pengaturan Bagan</button>
-    </header>
-
-    <main>
-        <div class="tree-container" id="orgTreeContainer"></div>
-    </main>
-
-    <div class="modal-overlay" id="settingModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 id="modalTitle">⚙️ Manajer Struktur & Foto Personel</h2>
-                <button class="btn-close" onclick="toggleModal(false)">✕</button>
+    <div class="chart-container">
+        
+        <div class="level">
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">ASLOG</div>
+                    <div class="name">-</div>
+                </div>
             </div>
             
-            <div class="form-container">
-                <div class="form-group">
-                    <label>Nama Satuan / Judul Utama</label>
-                    <input type="text" id="inputTitle" placeholder="Contoh: STAFF LOGISTIK KORPASGAT" onchange="updateTitle(this.value)">
-                </div>
-                
-                <hr style="border: 0; border-top: 1px solid #3a506b; margin: 8px 0;">
-                
-                <div class="form-group">
-                    <div class="form-row">
-                        <div>
-                            <label>Letak Baris (Tingkat)</label>
-                            <select id="inputRowPos">
-                                <option value="1">Baris 1 (Aslog)</option>
-                                <option value="2">Baris 2 (Pabandya)</option>
-                                <option value="3">Baris 3 (Kaur)</option>
-                                <option value="4">Baris 4 (Anggota Staf)</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>Grup Kolom (Keben-an)</label>
-                            <select id="inputColPos">
-                                <option value="1">Kolom 1 (Slog / Alpal)</option>
-                                <option value="2">Kolom 2 (BMN / Dallan)</option>
-                                <option value="3">Kolom 3 (Grup Tiga)</option>
-                                <option value="4">Kolom 4 (Grup Empat)</option>
-                            </select>
-                        </div>
+            <div class="secretariat-row">
+                <div class="node" onclick="openModal(this)">
+                    <div class="photo-slot"></div>
+                    <div class="info">
+                        <div class="title">Ka. URTU</div>
+                        <div class="name">-</div>
                     </div>
-                    
-                    <label>Nama Jabatan / Dinas</label>
-                    <input type="text" id="inputRole" placeholder="Contoh: KAUR ALPAL">
-                    
-                    <label>Pangkat & Nama Lengkap</label>
-                    <input type="text" id="inputName" placeholder="Contoh: Mayor Pas ...">
-                    
-                    <label>Nomor NRP Personel</label>
-                    <input type="text" id="inputID" placeholder="Contoh: NRP. 123456">
-                    
-                    <label>Link Url Foto Online</label>
-                    <input type="text" id="inputPhoto" placeholder="Contoh: https://site.com/foto.jpg">
                 </div>
-                
-                <button class="btn-submit" id="btnSubmitForm" onclick="addOrUpdatePersonel()">💾 Simpan Perubahan</button>
-                <button class="btn-cancel-edit" id="btnCancelEdit" onclick="cancelEditMode()">Batal Edit</button>
-                
-                <div class="manager-list" id="managerList"></div>
+                <div class="node" onclick="openModal(this)">
+                    <div class="photo-slot"></div>
+                    <div class="info">
+                        <div class="title">Ba. OPRT</div>
+                        <div class="name">-</div>
+                    </div>
+                </div>
+                <div class="node" onclick="openModal(this)">
+                    <div class="photo-slot"></div>
+                    <div class="info">
+                        <div class="title">TUR ADM</div>
+                        <div class="name">-</div>
+                    </div>
+                </div>
+                <div class="node" onclick="openModal(this)">
+                    <div class="photo-slot"></div>
+                    <div class="info">
+                        <div class="title">Ta. MUDI</div>
+                        <div class="name">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <hr style="width:100%; border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
+
+        <div class="level">
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbdy KALMAT</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbdy RUDAL SENMU</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbdy FASKON</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbdy SIMAK</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="level" style="gap: 25px;">
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd MAT</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd RANMOR</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd RUDAL</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd SENMU</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd FASINT</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd MIN</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd VER</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Pbd HARJAR APL</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="level" style="gap: 25px;">
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. MAT</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. RANMOR</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. RUDAL</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. SEN</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. MU</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. FASINT</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. MIN</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. VER</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ta. ARSIP</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+            <div class="node" onclick="openModal(this)">
+                <div class="photo-slot"></div>
+                <div class="info">
+                    <div class="title">Ba. APL</div>
+                    <div class="name">-</div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="inputModal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Input Data Anggota</h3>
+            <div class="form-group">
+                <label for="inputName">Nama Anggota/Pangkat:</label>
+                <input type="text" id="inputName" placeholder="Contoh: Serka Dudung">
+            </div>
+            <div class="form-group">
+                <label for="inputPhoto">Upload Foto:</label>
+                <input type="file" id="inputPhoto" accept="image/*">
+            </div>
+            <div class="btn-group">
+                <button class="btn btn-cancel" onclick="closeModal()">Batal</button>
+                <button class="btn btn-save" onclick="saveData()">Simpan</button>
             </div>
         </div>
     </div>
 
-<script>
-    const defaultAvatarBase64 = "data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0iIzMhNTBTYiI+PHBhdGggZD0iTTEyIDEyYzIuMjEgMCA0LXUtMS43OSAtNC00LTQtNCAxLjc5LTQgNCAxLjc5IDQgNCA0em0wIDJjLTIuNjcgMC04IDEuMzQtOCA0djJoMTZ2LTJjMC0yLjY2LTUuMzMtNC04LTR6Ii8+PC9zdmc+";
+    <script>
+        let currentNode = null;
 
-    let orgData = [];
-    let orgTitle = "STAFF LOGISTIK KORPASGAT";
-    let editingId = null;
-
-    function loadLocalData() {
-        try {
-            document.getElementById('loadingView').textContent = "📡 Memuat Struktur Organisasi...";
-            document.getElementById('loadingView').style.opacity = "1";
-            document.getElementById('loadingView').style.display = "flex";
+        function openModal(node) {
+            currentNode = node;
+            const currentName = node.querySelector('.name').innerText;
+            const jabatan = node.querySelector('.title').innerText;
             
-            const localTitle = localStorage.getItem('org_title');
-            const localPersonel = localStorage.getItem('org_personel');
+            document.getElementById('modalTitle').innerText = "Update: " + jabatan;
+            document.getElementById('inputName').value = currentName === '-' ? '' : currentName;
+            document.getElementById('inputPhoto').value = ''; // Reset input file
             
-            orgTitle = localTitle ? localTitle : "STAFF LOGISTIK KORPASGAT";
-            orgData = localPersonel ? JSON.parse(localPersonel) : [];
-            
-            document.getElementById('titleDisplay').textContent = orgTitle;
-            document.getElementById('inputTitle').value = orgTitle;
-            
-            renderTree();
-            
-            document.getElementById('loadingView').style.opacity = "0";
-            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
-        } catch (err) {
-            console.error(err);
-            document.getElementById('loadingView').style.display = "none";
-            alert("Gagal memuat data dari penyimpanan lokal.");
+            document.getElementById('inputModal').style.display = 'flex';
         }
-    }
 
-    function saveLocalData() {
-        try {
-            document.getElementById('loadingView').textContent = "🔄 Menyimpan Perubahan...";
-            document.getElementById('loadingView').style.display = "flex";
-            document.getElementById('loadingView').style.opacity = "1";
-
-            localStorage.setItem('org_title', orgTitle);
-            localStorage.setItem('org_personel', JSON.stringify(orgData));
-            
-            renderTree();
-
-            document.getElementById('loadingView').style.opacity = "0";
-            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
-        } catch (err) {
-            document.getElementById('loadingView').style.opacity = "0";
-            setTimeout(() => document.getElementById('loadingView').style.display = "none", 400);
-            alert("Gagal menyimpan data.");
+        function closeModal() {
+            document.getElementById('inputModal').style.display = 'none';
+            currentNode = null;
         }
-    }
 
-    function renderTree() {
-        const container = document.getElementById('orgTreeContainer');
-        const managerList = document.getElementById('managerList');
-        if(!container) return;
-        
-        container.innerHTML = '';
-        if(managerList) managerList.innerHTML = '';
+        function saveData() {
+            if (!currentNode) return;
 
-        // 1. Baris Level 1 (Aslog)
-        const level1Data = orgData.filter(item => parseInt(item.rowPos) === 1);
-        const topRowDiv = document.createElement('div');
-        topRowDiv.className = 'top-leader-row';
-        
-        level1Data.forEach(person => {
-            topRowDiv.appendChild(createCardHTML(person, 1));
-        });
-        container.appendChild(topRowDiv);
+            const nameInput = document.getElementById('inputName').value.trim();
+            const photoInput = document.getElementById('inputPhoto');
+            
+            // Set Nama
+            const nameDisplay = currentNode.querySelector('.name');
+            nameDisplay.innerText = nameInput ? nameInput : '-';
 
-        // 2. Container Divisi
-        const divisionsContainer = document.createElement('div');
-        divisionsContainer.className = 'staff-divisions-container';
-
-        const activeCols = [...new Set(orgData.filter(item => parseInt(item.rowPos) > 1).map(item => parseInt(item.colPos)))];
-        activeCols.sort((a, b) => a - b);
-
-        activeCols.forEach(colIdx => {
-            const colDiv = document.createElement('div');
-            colDiv.className = 'division-column';
-
-            // Pabandya (Row 2)
-            const pabandya = orgData.find(item => parseInt(item.rowPos) === 2 && parseInt(item.colPos) === colIdx);
-            if (pabandya) {
-                colDiv.appendChild(createCardHTML(pabandya, 2));
+            // Set Foto jika ada yang diunggah
+            if (photoInput.files && photoInput.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const photoSlot = currentNode.querySelector('.photo-slot');
+                    photoSlot.innerHTML = `<img src="${e.target.result}" alt="Foto">`;
+                }
+                reader.readAsDataURL(photoInput.files[0]);
             }
 
-            // Sub-Staf (Row 3 & Row 4) - Sekarang disejajarkan secara horizontal dengan .sub-staff-row
-            const subStaffData = orgData.filter(item => parseInt(item.rowPos) > 2 && parseInt(item.colPos) === colIdx);
-            subStaffData.sort((a, b) => parseInt(a.rowPos) - parseInt(b.rowPos));
+            closeModal();
+        }
 
-            if (subStaffData.length > 0) {
-                const subStaffRow = document.createElement('div');
-                subStaffRow.className = 'sub-staff-row';
-                
-                subStaffData.forEach(staff => {
-                    subStaffRow.appendChild(createCardHTML(staff, staff.rowPos));
-                });
-                colDiv.appendChild(subStaffRow);
+        // Menutup modal jika mengklik area luar modal
+        window.onclick = function(event) {
+            const modal = document.getElementById('inputModal');
+            if (event.target == modal) {
+                closeModal();
             }
-
-            divisionsContainer.appendChild(colDiv);
-        });
-
-        container.appendChild(divisionsContainer);
-
-        // Render List Modal
-        if(managerList) {
-            const sortedListData = [...orgData];
-            sortedListData.sort((a,b) => (parseInt(a.rowPos) - parseInt(b.rowPos)) || (parseInt(a.colPos) - parseInt(b.colPos)));
-            
-            sortedListData.forEach((person) => {
-                const item = document.createElement('div');
-                item.className = 'manager-item';
-                item.innerHTML = `
-                    <div class="manager-item-text">
-                        <span style="background:#0284c7; color:white; padding:2px 6px; border-radius:4px; font-size:10px; font-weight:bold;">Tingkat ${person.rowPos} | Kolom ${person.colPos}</span>
-                        <strong style="margin-left:5px;">${person.role}</strong> - ${person.name}
-                    </div>
-                    <div class="action-buttons">
-                        <button class="btn-action-edit" onclick="startEditPersonel('${person.id}')">Edit</button>
-                        <button class="btn-delete" onclick="deletePersonel('${person.id}')">Hapus</button>
-                    </div>
-                `;
-                managerList.appendChild(item);
-            });
         }
-    }
-
-    function createCardHTML(person, level) {
-        const imgUrl = person.photo ? person.photo : defaultAvatarBase64;
-        const card = document.createElement('div');
-        card.className = `card level-${level}`;
-        // Perbaikan alt text kosong agar tidak memunculkan teks rusak jika gambar error
-        card.innerHTML = `
-            <div class="photo-frame">
-                <img src="${imgUrl}" onerror="this.src='${defaultAvatarBase64}'" alt="">
-            </div>
-            <div class="card-details">
-                <div class="role">${person.role}</div>
-                <div class="name">${person.name}</div>
-                <div class="id-number">${person.idNo || ''}</div>
-            </div>
-        `;
-        return card;
-    }
-
-    function addOrUpdatePersonel() {
-        const rowPos = parseInt(document.getElementById('inputRowPos').value);
-        const colPos = parseInt(document.getElementById('inputColPos').value);
-        const role = document.getElementById('inputRole').value.trim();
-        const name = document.getElementById('inputName').value.trim();
-        const idNo = document.getElementById('inputID').value.trim();
-        const photo = document.getElementById('inputPhoto').value.trim();
-
-        if (!role || !name) return alert("Nama Jabatan dan Pangkat/Nama Lengkap Personel wajib terisi!");
-
-        if (editingId) {
-            const index = orgData.findIndex(item => item.id === editingId);
-            if (index !== -1) {
-                orgData[index] = { id: editingId, rowPos, colPos, role, name, idNo, photo };
-            }
-            cancelEditMode();
-        } else {
-            const newId = String(new Date().getTime());
-            orgData.push({ id: newId, rowPos, colPos, role, name, idNo, photo });
-            clearForm();
-        }
-        saveLocalData();
-    }
-
-    function startEditPersonel(id) {
-        const person = orgData.find(item => item.id === id);
-        if (!person) return;
-
-        editingId = id;
-        document.getElementById('modalTitle').textContent = "✏️ Ubah Data Komponen Organisasi";
-        document.getElementById('btnSubmitForm').textContent = "💾 Simpan Perubahan";
-        document.getElementById('btnCancelEdit').style.display = "block";
-
-        document.getElementById('inputRowPos').value = person.rowPos;
-        document.getElementById('inputColPos').value = person.colPos;
-        document.getElementById('inputRole').value = person.role;
-        document.getElementById('inputName').value = person.name;
-        document.getElementById('inputID').value = person.idNo || '';
-        document.getElementById('inputPhoto').value = person.photo || '';
-    }
-
-    function cancelEditMode() {
-        editingId = null;
-        document.getElementById('modalTitle').textContent = "⚙️ Manajer Struktur & Foto Personel";
-        document.getElementById('btnSubmitForm').textContent = "💾 Simpan Struktur";
-        document.getElementById('btnCancelEdit').style.display = "none";
-        clearForm();
-    }
-
-    function deletePersonel(id) {
-        if (confirm("Hapus personel ini dari kesatuan bagan?")) {
-            if(editingId === id) cancelEditMode();
-            orgData = orgData.filter(item => item.id !== id);
-            saveLocalData();
-        }
-    }
-
-    function clearForm() {
-        document.getElementById('inputRole').value = '';
-        document.getElementById('inputName').value = '';
-        document.getElementById('inputID').value = '';
-        document.getElementById('inputPhoto').value = '';
-    }
-
-    function updateTitle(val) {
-        orgTitle = val.trim() || "STAFF LOGISTIK KORPASGAT";
-        document.getElementById('titleDisplay').textContent = orgTitle;
-        saveLocalData();
-    }
-
-    function toggleModal(show) { 
-        if(!show) cancelEditMode();
-        document.getElementById('settingModal').classList.toggle('active', show); 
-    }
-
-    window.addEventListener('DOMContentLoaded', loadLocalData);
-</script>
+    </script>
 </body>
 </html>
