@@ -38,7 +38,6 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 20px;
             background: rgba(255, 255, 255, 0.05);
             padding: 30px;
             border-radius: 10px;
@@ -57,6 +56,32 @@
             position: relative;
         }
 
+        /* Struktur Khusus Tingkat Atas (ASLOG & URTU) */
+        .top-management {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        /* Garis Vertikal Turun dari ASLOG */
+        .top-management::after {
+            content: '';
+            position: absolute;
+            bottom: -25px;
+            left: calc(50% - 110px); /* Menyesuaikan posisi tengah tiang ASLOG */
+            width: 2px;
+            height: 25px;
+            background-color: var(--box-color);
+        }
+
+        .aslog-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+        }
+
         /* Kotak Jabatan */
         .node {
             background-color: rgba(91, 192, 190, 0.2);
@@ -72,7 +97,6 @@
             box-sizing: border-box;
             cursor: pointer;
             transition: all 0.3s ease;
-            position: relative;
         }
 
         .node:hover {
@@ -128,12 +152,33 @@
             text-overflow: ellipsis;
         }
 
-        /* Hubungan Samping ASLOG (Sekretariat/URTU) */
-        .secretariat-row {
+        /* Kelompok Jajaran Staf URTU */
+        .staff-right-row {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-left: 180px; /* Geser ke kanan sesuai struktur asli */
+            padding-top: 40px; /* Membuat posisi jajaran URTU berada sedikit di bawah ASLOG */
+            position: relative;
+        }
+
+        /* Garis Penghubung Samping dari ASLOG ke URTU */
+        .staff-right-row::before {
+            content: '';
+            position: absolute;
+            left: -40px;
+            top: calc(40px + 75px); /* Menyelaraskan garis horizontal dengan tengah kotak URTU */
+            width: 40px;
+            height: 2px;
+            background-color: var(--box-color);
+        }
+
+        /* Garis Pemisah Antar Level */
+        .divider {
+            width: 90%;
+            border: 0;
+            border-top: 2px solid var(--box-color);
+            margin: 0 dashed rgba(255,255,255,0.2);
+            margin-bottom: 25px;
         }
 
         /* Form Pop-up (Modal) */
@@ -180,7 +225,7 @@
             font-weight: bold;
         }
 
-        .form-group input [type="text"] {
+        .form-group input[type="text"] {
             padding: 8px;
             border: 1px solid #ccc;
             border-radius: 4px;
@@ -211,50 +256,56 @@
 
     <div class="chart-container">
         
-        <div class="level">
-            <div class="node" onclick="openModal(this)">
-                <div class="photo-slot"></div>
-                <div class="info">
-                    <div class="title">ASLOG</div>
-                    <div class="name">-</div>
-                </div>
-            </div>
-            
-            <div class="secretariat-row">
+        <!-- LEVEL 1: ASLOG (Dibuat Lebih Atas) & Jajaran URTU -->
+        <div class="top-management">
+            <div class="aslog-row">
+                <!-- Pucuk Pimpinan -->
                 <div class="node" onclick="openModal(this)">
                     <div class="photo-slot"></div>
                     <div class="info">
-                        <div class="title">Ka. URTU</div>
+                        <div class="title">ASLOG</div>
                         <div class="name">-</div>
                     </div>
                 </div>
-                <div class="node" onclick="openModal(this)">
-                    <div class="photo-slot"></div>
-                    <div class="info">
-                        <div class="title">Ba. OPRT</div>
-                        <div class="name">-</div>
+                
+                <!-- Staf Samping Jajaran URTU -->
+                <div class="staff-right-row">
+                    <div class="node" onclick="openModal(this)">
+                        <div class="photo-slot"></div>
+                        <div class="info">
+                            <div class="title">Ka. URTU</div>
+                            <div class="name">-</div>
+                        </div>
                     </div>
-                </div>
-                <div class="node" onclick="openModal(this)">
-                    <div class="photo-slot"></div>
-                    <div class="info">
-                        <div class="title">TUR ADM</div>
-                        <div class="name">-</div>
+                    <div class="node" onclick="openModal(this)">
+                        <div class="photo-slot"></div>
+                        <div class="info">
+                            <div class="title">Ba. OPRT</div>
+                            <div class="name">-</div>
+                        </div>
                     </div>
-                </div>
-                <div class="node" onclick="openModal(this)">
-                    <div class="photo-slot"></div>
-                    <div class="info">
-                        <div class="title">Ta. MUDI</div>
-                        <div class="name">-</div>
+                    <div class="node" onclick="openModal(this)">
+                        <div class="photo-slot"></div>
+                        <div class="info">
+                            <div class="title">TUR ADM</div>
+                            <div class="name">-</div>
+                        </div>
+                    </div>
+                    <div class="node" onclick="openModal(this)">
+                        <div class="photo-slot"></div>
+                        <div class="info">
+                            <div class="title">Ta. MUDI</div>
+                            <div class="name">-</div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <hr style="width:100%; border: 0; border-top: 2px dashed rgba(255,255,255,0.2); margin: 15px 0;">
+        <div class="divider"></div>
 
-        <div class="level">
+        <!-- LEVEL 2: Para Pbody Utama -->
+        <div class="level" style="margin-bottom: 25px;">
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
                 <div class="info">
@@ -285,7 +336,9 @@
             </div>
         </div>
 
-        <div class="level" style="gap: 25px;">
+        <!-- LEVEL 3: Sub-Staf (Pbd) -->
+        <div class="level" style="gap: 25px; margin-bottom: 25px;">
+            <!-- Bawah Kalmat -->
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
                 <div class="info">
@@ -300,6 +353,7 @@
                     <div class="name">-</div>
                 </div>
             </div>
+            <!-- Bawah Rudal Senmu -->
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
                 <div class="info">
@@ -314,6 +368,7 @@
                     <div class="name">-</div>
                 </div>
             </div>
+            <!-- Bawah Faskon -->
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
                 <div class="info">
@@ -321,6 +376,7 @@
                     <div class="name">-</div>
                 </div>
             </div>
+            <!-- Bawah Simak -->
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
                 <div class="info">
@@ -344,6 +400,7 @@
             </div>
         </div>
 
+        <!-- LEVEL 4: Pelaksana Bintara/Tamtama (Ba/Ta) -->
         <div class="level" style="gap: 25px;">
             <div class="node" onclick="openModal(this)">
                 <div class="photo-slot"></div>
@@ -419,6 +476,7 @@
 
     </div>
 
+    <!-- MODAL INPUT DATA -->
     <div id="inputModal" class="modal">
         <div class="modal-content">
             <h3 id="modalTitle">Input Data Anggota</h3>
@@ -447,7 +505,7 @@
             
             document.getElementById('modalTitle').innerText = "Update: " + jabatan;
             document.getElementById('inputName').value = currentName === '-' ? '' : currentName;
-            document.getElementById('inputPhoto').value = ''; // Reset input file
+            document.getElementById('inputPhoto').value = ''; 
             
             document.getElementById('inputModal').style.display = 'flex';
         }
@@ -463,11 +521,9 @@
             const nameInput = document.getElementById('inputName').value.trim();
             const photoInput = document.getElementById('inputPhoto');
             
-            // Set Nama
             const nameDisplay = currentNode.querySelector('.name');
             nameDisplay.innerText = nameInput ? nameInput : '-';
 
-            // Set Foto jika ada yang diunggah
             if (photoInput.files && photoInput.files[0]) {
                 const reader = new FileReader();
                 reader.onload = function(e) {
@@ -480,7 +536,6 @@
             closeModal();
         }
 
-        // Menutup modal jika mengklik area luar modal
         window.onclick = function(event) {
             const modal = document.getElementById('inputModal');
             if (event.target == modal) {
