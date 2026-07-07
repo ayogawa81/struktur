@@ -143,11 +143,11 @@
 </div>
 
 <script>
-    // URL dasar bersih tanpa rest/v1 untuk kompatibilitas SDK Supabase
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
     let supabaseClient = null;
+    let channelRealtime = null;
 
     window.onload = function() {
         inisialisasiSupabase();
@@ -158,16 +158,19 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Otomatis Terhubung 🟢";
             
-            // Berlangganan siaran real-time
-            supabaseClient.channel('tv_channel')
-            .on('broadcast', { event: 'update_doc' }, (response) => {
-                if(response.payload) tampilkanDokumen(response.payload);
-            })
-            .subscribe();
+            // Inisialisasi channel broadcast global
+            channelRealtime = supabaseClient.channel('tv_channel', {
+                config: { broadcast: { self: true } } // Izinkan pengirim melihat hasilnya sendiri untuk tes langsung
+            });
+
+            channelRealtime.on('broadcast', { event: 'update_doc' }, (response) => {
+                if (response.payload) {
+                    tampilkanDokumen(response.payload);
+                }
+            }).subscribe();
+
         } catch (e) {
             document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung ke Cloud Server 🔴";
-            document.getElementById('koneksiStatus').style.color = "#e74c3c";
-            document.getElementById('koneksiStatus').style.background = "rgba(231, 76, 60, 0.1)";
         }
     }
 
@@ -183,36 +186,42 @@
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // Mengunggah ke bucket 'dokumen' (huruf kecil)
+            // Proses unggah ke folder 'dokumen'
             const { data, error } = await supabaseClient
                 .storage
                 .from('dokumen')
                 .upload(secureFileName, file, { 
-                    cacheControl: '3600',
+                    cacheControl: '0', // Set ke 0 agar gambar tidak tertahan cache server lama
                     upsert: true
                 });
 
             if (error) throw error;
 
+            // Dapatkan URL publik file hasil unggahan
             const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
 
-            // Menyiarkan tautan publik dan informasi ekstensi berkas
-            await supabaseClient.channel('tv_channel').send({
+            if (!urlData || !urlData.publicUrl) throw new Error("Gagal generate link publik.");
+
+            // PERBAIKAN UTAMA: Kirim data muatan lengkap ke seluruh TV Monitor
+            await channelRealtime.send({
                 type: 'broadcast',
                 event: 'update_doc',
-                payload: { url: urlData.publicUrl, type: 'file', ext: extension }
+                payload: { 
+                    url: urlData.publicUrl, 
+                    type: 'file', 
+                    ext: extension 
+                }
             });
 
-            alert("Sukses! File berhasil disiarkan ke monitor TV.");
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #2ecc71; font-size: 18px;">File sukses dikirim!</p>';
+            alert("Sukses! File berhasil dikirim.");
         } catch (error) {
             alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa kembali konfigurasi RLS bucket Anda.</p>';
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file.</p>';
         }
     });
 
     async function kirimTautan() {
-        if (!supabaseClient) return alert("Koneksi server terputus!");
+        if (!supabaseClient || !channelRealtime) return alert("Koneksi server terputus!");
         let url = document.getElementById('cloudUrl').value.trim();
         if (!url) return alert("Silakan masukkan tautan terlebih dahulu!");
 
@@ -223,11 +232,12 @@
             finalUrl = url.replace(/\/view\?usp=sharing|\/view|\/edit\?usp=sharing|\/edit/g, "/preview");
         }
 
-        await supabaseClient.channel('tv_channel').send({
+        await channelRealtime.send({
             type: 'broadcast',
             event: 'update_doc',
-            payload: { url: finalUrl, type: 'link' }
+            payload: { url: finalUrl, type: 'link', ext: '' }
         });
+        
         alert("Link sukses disiarkan!");
         document.getElementById('cloudUrl').value = "";
     }
@@ -238,7 +248,6 @@
         box.style.background = "#ffffff";
         box.style.padding = "30px";
 
-        // Konversi ke huruf kecil untuk menghindari masalah case-sensitive (.PNG / .JPG)
         const ext = payload.ext ? payload.ext.toLowerCase() : '';
 
         if (payload.type === 'link' || ext === 'pdf') {
@@ -251,19 +260,18 @@
                     box.innerHTML = `<div style="font-size:24px; color:#222; text-align:left;">${result.value}</div>`;
                 });
             }).catch(err => {
-                box.innerHTML = `<p style="text-align:center; color:#e74c3c;">Gagal membaca file Word: ${err.message}</p>`;
+                box.innerHTML = `<p style="text-align:center; color:#e74c3c;">Gagal membaca file Word</p>`;
             });
         } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
             box.style.background = "transparent";
             box.style.padding = "0";
-            // Memaksa gambar tampil proporsional dan maksimal di tengah monitor TV
+            // Tampilkan gambar penuh di tengah layar monitor TV
             box.innerHTML = `<img src="${payload.url}?t=${new Date().getTime()}" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">`;
         } else if (ext === 'txt') {
             fetch(payload.url).then(res => res.text()).then(text => {
                 box.innerHTML = `<pre style="white-space: pre-wrap; font-size:22px; color:#222; text-align:left; font-family:monospace;">${text}</pre>`;
             });
         } else {
-            // Jalur alternatif (Fallback) jika berkas tidak memiliki ekstensi terdaftar
             box.style.background = "transparent";
             box.style.padding = "0";
             box.innerHTML = `<iframe src="${payload.url}"></iframe>`;
