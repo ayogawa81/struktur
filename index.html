@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Document Viewer</title>
+    <title>Universal Document Viewer - KORPASGAT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        /* Desain Modern & Kontras Tinggi (Sangat Ramah untuk TV, PC, dan HP) */
+        /* Desain Modern, Kontras Tinggi & Sangat Ramah Layar TV / HP */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
@@ -58,7 +59,7 @@
 
         .btn-source:hover { background-color: #c0392b; }
 
-        /* Input Link Cloud (Google Drive, Sheets, Dropbox) */
+        /* Input Link Cloud (Google Drive, Sheets, dll) */
         .cloud-input-group {
             display: flex;
             gap: 5px;
@@ -87,7 +88,7 @@
         }
         .btn-cloud:hover { background-color: #27ae60; }
 
-        /* Area Tampilan Dokumen */
+        /* Area Tampilan Dokumen Utama */
         .viewer-area {
             flex: 1;
             padding: 20px;
@@ -105,13 +106,13 @@
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            font-size: 24px; /* Default besar agar terbaca jelas di TV */
+            font-size: 24px; /* Default besar agar terbaca jelas dari jauh di TV */
             line-height: 1.6;
-            display: none;
+            display: block;
             overflow-x: auto;
         }
 
-        /* Styling Iframe agar bersih dan memenuhi layar pratinjau */
+        /* Styling Iframe pratinjau agar bersih memenuhi layar */
         iframe {
             width: 100%;
             height: 75vh;
@@ -128,10 +129,16 @@
             border-radius: 6px;
         }
 
+        .status-tv {
+            font-size: 14px;
+            color: #bdc3c7;
+            margin-top: 5px;
+        }
+
         /* Responsivitas Otomatis untuk Layar HP */
         @media (max-width: 600px) {
             .content-box {
-                font-size: 16px; /* Ukuran mengecil di HP agar tidak terlalu raksasa */
+                font-size: 16px; /* Ukuran mengecil di HP agar pas di genggaman */
                 padding: 15px;
             }
             .title { font-size: 18px; }
@@ -143,114 +150,146 @@
 <body>
 
 <div class="header">
-    <div class="title">📱📺 Universal Document Viewer</div>
+    <div class="title">📺 Universal Real-Time TV Monitor</div>
     <div class="control-panel">
         
         <div>
-            <label for="fileInput" class="btn-source">📁 Upload File (HP/PC)</label>
+            <label for="fileInput" class="btn-source">📁 Kirim File dari HP/PC</label>
             <input type="file" id="fileInput" accept=".docx, .pdf, .txt, image/*" style="display: none;">
         </div>
 
         <div class="cloud-input-group">
-            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Paste link Google Sheets / Cloud publik...">
-            <button class="btn-cloud" onclick="viewFromCloud()">Buka</button>
+            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Masukkan Link Google Sheets dari HP...">
+            <button class="btn-cloud" onclick="uploadLinkFromHp()">Kirim Link</button>
         </div>
 
     </div>
+    <div class="status-tv">Sistem Sinkronisasi Otomatis Terhubung 🟢</div>
 </div>
 
 <div class="viewer-area">
     <div class="content-box" id="contentBox">
-        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Silakan pilih file dari HP/PC atau masukkan tautan Cloud Storage di atas.</p>
+        <p style="text-align: center; color: #7f8c8d; font-size: 18px;" id="placeholderText">Menunggu kiriman data/dokumen dari perangkat HP...</p>
     </div>
 </div>
 
 <script>
+    // =========================================================================
+    // TEMPAT MENEMPELKAN API KEYS SUPABASE ANDA:
+    // Ganti string di bawah ini dengan Project URL dan anon public key milik Anda
+    // =========================================================================
+    const SUPABASE_URL = "https://XYZ_MASUKKAN_URL_ANDA_DISINI.supabase.co";
+    const SUPABASE_KEY = "XYZ_MASUKKAN_ANON_KEY_ANDA_DISINI";
+    
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const contentBox = document.getElementById('contentBox');
 
     // ===================================================
-    // 1. MEMPROSES FILE DARI LOKAL (PC / MEMORI HP)
+    // 1. PROSES UPLOAD FILE DARI PERANGKAT (HP / PC)
     // ===================================================
-    document.getElementById('fileInput').addEventListener('change', function(event) {
+    document.getElementById('fileInput').addEventListener('change', async function(event) {
         const file = event.target.files[0];
-        resetViewer();
-
         if (!file) return;
-        const fileType = file.name.split('.').pop().toLowerCase();
 
-        if (fileType === 'pdf') {
-            const fileURL = URL.createObjectURL(file);
-            renderIframe(fileURL);
-        } 
-        else if (fileType === 'docx') {
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                mammoth.convertToHtml({arrayBuffer: e.target.result})
-                    .then(function(result) {
-                        contentBox.innerHTML = `<div class="large-text">${result.value}</div>`;
-                        adjustTextSize();
-                    })
-                    .catch(err => alert("Gagal membaca file Word: " + err.message));
-            };
-            reader.readAsArrayBuffer(file);
-        } 
-        else if (fileType === 'txt') {
-            const reader = new FileReader();
-            reader.onload = e => contentBox.innerHTML = `<pre style="white-space: pre-wrap;">${e.target.result}</pre>`;
-            reader.readAsText(file);
-        } 
-        else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
-            contentBox.style.background = "transparent";
-            contentBox.innerHTML = `<img src="${URL.createObjectURL(file)}">`;
+        alert("Sedang mentransfer file ke cloud, mohon tunggu sebentar...");
+        const extension = file.name.split('.').pop().toLowerCase();
+        const fileName = `remote_doc.${extension}`;
+
+        // Mengunggah langsung dan menimpa file lama (upsert: true) di dalam Bucket 'dokumen'
+        const { data, error } = await supabase.storage
+            .from('dokumen')
+            .upload(fileName, file, { upsert: true });
+
+        if (error) {
+            alert("Transfer file gagal: " + error.message);
+        } else {
+            // Dapatkan URL publik dari berkas yang diupload
+            const { data: urlData } = supabase.storage.from('dokumen').getPublicUrl(fileName);
+            
+            // Mengirimkan instruksi Broadcast real-time agar layar TV yang stanby langsung memproses file
+            await supabase.channel('tv_channel').send({
+                type: 'broadcast',
+                event: 'update_doc',
+                payload: { url: urlData.publicUrl, type: 'file', ext: extension }
+            });
+            alert("File berhasil dikirim dan ditampilkan ke TV!");
         }
     });
 
     // ===================================================
-    // 2. MEMPROSES FILE DARI TAUTAN CLOUD STORAGE
+    // 2. PROSES PENGIRIMAN LINK GOOGLE SPREADSHEET DARI HP
     // ===================================================
-    function viewFromCloud() {
+    async function uploadLinkFromHp() {
         let url = document.getElementById('cloudUrl').value.trim();
-        if (!url) return alert("Masukkan URL Cloud terlebih dahulu!");
+        if (!url) return alert("Silakan masukkan tautan terlebih dahulu!");
 
-        resetViewer();
-
-        // A. PENANGANAN OTOMATIS JIKA INPUT ADALAH GOOGLE SPREADSHEET / SHEET
+        let finalUrl = url;
+        
+        // Pembersihan otomatis format URL agar ramah tayang di iframe (Mode Preview)
         if (url.includes("docs.google.com/spreadsheets")) {
-            // Mengubah ujung link /edit menjadi /preview dengan parameter minimal agar tidak memicu error terbitan
             let baseSpreadsheetUrl = url.split('/edit')[0];
-            let spreadsheetPreviewUrl = `${baseSpreadsheetUrl}/preview?rm=minimal`;
-            renderIframe(spreadsheetPreviewUrl);
+            finalUrl = `${baseSpreadsheetUrl}/preview?rm=minimal`;
+        } else if (url.includes("drive.google.com") || url.includes("docs.google.com")) {
+            finalUrl = url.replace(/\/view\?usp=sharing|\/view|\/edit\?usp=sharing|\/edit/g, "/preview");
+        }
+
+        // Siarkan link tersebut ke TV secara langsung via broadcast
+        await supabase.channel('tv_channel').send({
+            type: 'broadcast',
+            event: 'update_doc',
+            payload: { url: finalUrl, type: 'link' }
+        });
+        alert("Link dokumen terkirim ke TV!");
+    }
+
+    // ===================================================
+    // 3. SINKRONISASI REAL-TIME (PENERIMA LAYAR MONITOR TV)
+    // ===================================================
+    supabase.channel('tv_channel')
+    .on('broadcast', { event: 'update_doc' }, (response) => {
+        const payload = response.payload;
+        tampilkanDokumen(payload);
+    })
+    .subscribe();
+
+    // Fungsi utama penampil data di halaman web
+    function tampilkanDokumen(payload) {
+        contentBox.innerHTML = "";
+        contentBox.style.background = "#ffffff";
+        contentBox.style.padding = "30px";
+
+        // Tampilan Link Google Sheets / PDF menggunakan Frame khusus
+        if (payload.type === 'link' || payload.ext === 'pdf') {
+            contentBox.style.background = "transparent";
+            contentBox.style.padding = "0";
+            contentBox.innerHTML = `<iframe src="${payload.url}"></iframe>`;
         } 
-        // B. PENANGANAN JIKA INPUT ADALAH GOOGLE DOCS / SLIDES / DRIVE LAINNYA
-        else if (url.includes("drive.google.com") || url.includes("docs.google.com")) {
-            // Mengubah parameter sharing biasa menjadi format preview iframe yang diizinkan oleh Google
-            let embedUrl = url.replace(/\/view\?usp=sharing|\/view|\/edit\?usp=sharing|\/edit/g, "/preview");
-            renderIframe(embedUrl);
-        } 
-        // C. JIKA LINK CLOUD LUAR (Dropbox, OneDrive, Hosting Publik, dll)
-        else {
-            // Menggunakan Google Docs Viewer API pihak ketiga sebagai jembatan pembaca otomatis
-            const proxyUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
-            renderIframe(proxyUrl);
+        // Pembacaan file Word .docx secara lokal
+        else if (payload.ext === 'docx') {
+            fetch(payload.url)
+                .then(res => res.arrayBuffer())
+                .then(buffer => {
+                    mammoth.convertToHtml({arrayBuffer: buffer}).then(result => {
+                        contentBox.innerHTML = `<div class="large-text">${result.value}</div>`;
+                        adjustTextSize();
+                    });
+                });
+        }
+        // Penampil Gambar (Jadwal/Infografis)
+        else if (['jpg', 'jpeg', 'png', 'gif'].includes(payload.ext)) {
+            contentBox.style.background = "transparent";
+            contentBox.innerHTML = `<img src="${payload.url}">`;
+        }
+        // Penampil dokumen Notepad .txt biasa
+        else if (payload.ext === 'txt') {
+            fetch(payload.url).then(res => res.text()).then(text => {
+                contentBox.innerHTML = `<pre style="white-space: pre-wrap;">${text}</pre>`;
+            });
         }
     }
 
-    // Fungsi Pembantu (Helpers)
-    function resetViewer() {
-        contentBox.innerHTML = "";
-        contentBox.style.display = "block";
-        contentBox.style.background = "#ffffff";
-        contentBox.style.padding = "30px";
-    }
-
-    function renderIframe(srcUrl) {
-        contentBox.style.background = "transparent";
-        contentBox.style.padding = "0";
-        contentBox.innerHTML = `<iframe src="${srcUrl}"></iframe>`;
-    }
-
     function adjustTextSize() {
-        // Jika dibuka di TV/PC (Layar Lebar), perbesar font teks dokumen lokal secara otomatis
+        // Otomatis memperbesar teks dokumen jika mendeteksi layar lebar TV/PC
         if (window.innerWidth > 1024) {
             document.querySelectorAll('.large-text *').forEach(el => {
                 el.style.fontSize = "26px";
