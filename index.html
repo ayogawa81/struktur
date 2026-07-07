@@ -149,7 +149,6 @@
 </div>
 
 <script>
-    // Kredensial Akses Cloud Server Supabase
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co/rest/v1/";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
@@ -164,7 +163,6 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Otomatis Terhubung 🟢";
             
-            // Berlangganan saluran real-time broadcast monitor
             supabaseClient.channel('tv_channel')
             .on('broadcast', { event: 'update_doc' }, (response) => {
                 if(response.payload) tampilkanDokumen(response.payload);
@@ -183,15 +181,13 @@
         if (!file) return;
 
         const extension = file.name.split('.').pop().toLowerCase();
-        
-        // Pembuatan nama unik acak agar jalur URL aman & valid
         const uniqueTime = new Date().getTime();
         const secureFileName = `monitor_${uniqueTime}.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // FIX FINAL: Menggunakan nama bucket 'dokumen' huruf kecil penuh sesuai sistem server
+            // Menggunakan nama bucket huruf kecil 'dokumen' secara konsisten
             const { data, error } = await supabaseClient
                 .storage
                 .from('dokumen')
@@ -202,10 +198,8 @@
 
             if (error) throw error;
 
-            // Ambil URL publik dari berkas yang sukses diunggah
             const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
 
-            // Siarkan pembaruan rute ke TV monitor tujuan secara instan
             await supabaseClient.channel('tv_channel').send({
                 type: 'broadcast',
                 event: 'update_doc',
@@ -216,7 +210,7 @@
             document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #2ecc71; font-size: 18px;">File sukses dikirim!</p>';
         } catch (error) {
             alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa kembali konfigurasi bucket Anda.</p>';
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Pastikan nama bucket di script sesuai.</p>';
         }
     });
 
