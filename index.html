@@ -186,11 +186,11 @@
     let supabaseClient = null;
 
     window.onload = function() {
-        const savedUrl = localStorage.getItem('sb_url') || "https://ftokzxocmfwzitafwqoz.supabase.co";
+        const savedUrl = localStorage.getItem('sb_url') || "";
         const savedKey = localStorage.getItem('sb_key') || "";
         
-        document.getElementById('cfgUrl').value = savedUrl;
-        document.getElementById('cfgKey').value = savedKey;
+        if (savedUrl) document.getElementById('cfgUrl').value = savedUrl;
+        if (savedKey) document.getElementById('cfgKey').value = savedKey;
 
         if (savedUrl && savedKey) {
             inisialisasiSupabase(savedUrl, savedKey);
@@ -198,7 +198,9 @@
     };
 
     function simpanKonfigurasi() {
-        const url = document.getElementById('cfgUrl').value.trim();
+        // Membersihkan karakter spasi atau garis miring di ujung teks input
+        let url = document.getElementById('cfgUrl').value.trim();
+        if(url.endsWith('/')) { url = url.slice(0, -1); }
         const key = document.getElementById('cfgKey').value.trim();
 
         if (!url || !key) {
@@ -210,7 +212,7 @@
         localStorage.setItem('sb_key', key);
         
         inisialisasiSupabase(url, key);
-        alert("Konfigurasi disimpan! Mencoba menghubungkan sistem...");
+        alert("Konfigurasi diperbarui & dibersihkan! Menghubungkan ulang...");
     }
 
     function inisialisasiSupabase(url, key) {
@@ -230,30 +232,31 @@
         }
     }
 
-    // KIRIM FILE MENGGUNAKAN SDK RESMI SUPABASE STORAGE (ANTI JALUR EROR)
     document.getElementById('fileInput').addEventListener('change', async function(event) {
         if (!supabaseClient) return alert("Supabase belum terhubung! Isi URL dan Key di atas.");
         const file = event.target.files[0];
         if (!file) return;
 
         const extension = file.name.split('.').pop().toLowerCase();
-        const fileName = `monitor_file.${extension}`;
+        // Memaksa penamaan statis agar nama file asli laptop yang aneh tidak merusak URL path
+        const secureFileName = `file_monitor.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang mengunggah berkas ke cloud server...</p>';
 
         try {
-            // Menggunakan fungsi .upload bawaan library agar jalurnya otomatis diverifikasi pas oleh sistem
+            // Pembersihan paksa cache upload Supabase SDK
             const { data, error } = await supabaseClient
                 .storage
                 .from('dokumen')
-                .upload(fileName, file, { upsert: true });
+                .upload(secureFileName, file, { 
+                    upsert: true,
+                    contentType: file.type
+                });
 
             if (error) throw error;
 
-            // Ambil URL publik file tersebut
-            const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(fileName);
+            const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
 
-            // Siarkan langsung ke TV monitor
             await supabaseClient.channel('tv_channel').send({
                 type: 'broadcast',
                 event: 'update_doc',
@@ -262,8 +265,8 @@
 
             alert("Sukses! File berhasil disiarkan.");
         } catch (error) {
-            alert("Error Upload: " + error.message + "\n\nCatatan: Pastikan di akun Supabase Anda sudah ada Bucket bernama 'dokumen' dengan akses PUBLIC.");
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa perizinan bucket Supabase Anda.</p>';
+            alert("Error Upload: " + error.message);
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa sambungan atau hapus riwayat cache browser Anda.</p>';
         }
     });
 
