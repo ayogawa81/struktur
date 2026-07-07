@@ -95,12 +95,40 @@
         }
         .btn-fullscreen:hover { background-color: #d35400; }
 
+        /* Gaya Tombol Link Eksternal yang Baru Ditambahkan */
+        .direct-link-container {
+            max-width: 1200px;
+            width: 100%;
+            margin: 10px auto 0 auto;
+            padding: 0 25px;
+            box-sizing: border-box;
+            display: none; /* Sembunyi secara default, muncul jika tipe 'link' */
+        }
+        .btn-direct-link {
+            display: block;
+            background-color: #3498db;
+            color: white;
+            text-decoration: none;
+            text-align: center;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+            transition: background 0.2s;
+        }
+        .btn-direct-link:hover {
+            background-color: #2980b9;
+        }
+
         .viewer-area {
             flex: 1;
             padding: 25px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
+            flex-direction: column;
+            align-items: center;
         }
         .content-box {
             width: 100%;
@@ -116,6 +144,7 @@
             transition: all 0.3s;
             box-sizing: border-box;
             overflow: auto;
+            margin-top: 15px;
         }
         
         .content-box:fullscreen {
@@ -125,6 +154,7 @@
             border-radius: 0 !important;
             padding: 15px !important;
             background-color: #ffffff;
+            margin-top: 0;
         }
         
         iframe {
@@ -189,6 +219,10 @@
     <div class="status-tv" id="koneksiStatus">Menghubungkan ke Sistem Jaringan...</div>
 </div>
 
+<div class="direct-link-container" id="linkContainer">
+    <a href="#" id="directLink" target="_blank" class="btn-direct-link">🔗 Buka Sumber Link Asli (Google Drive / Web)</a>
+</div>
+
 <div class="viewer-area">
     <div class="content-box" id="contentBox">
         <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Menunggu kiriman data/dokumen dari perangkat HP...</p>
@@ -197,7 +231,7 @@
 
 <script>
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3bW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
     let supabaseClient = null;
     let channelRealtime = null;
@@ -268,14 +302,15 @@
                 payload: { 
                     url: urlData.publicUrl, 
                     type: 'file', 
-                    ext: extension 
+                    ext: extension,
+                    originalUrl: urlData.publicUrl // simpan link asli
                 }
             });
 
             alert("Sukses! File berhasil dikirim.");
         } catch (error) {
             alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = `<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file: ${error.message}</p>`;
+            document.getElementById('contentBox').innerHTML = `<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file: ${error.message}</p>';`;
         }
     });
 
@@ -286,37 +321,32 @@
 
         let finalUrl = url;
         
-        // ENGINE DETEKSI & PARSING KHUSUS LINK GOOGLE DRIVE BYPASS COOKIE SECURITY
         if (url.includes("docs.google.com/spreadsheets")) {
-            // Google Sheets Bypass
             let sheetId = url.split('/d/')[1].split('/')[0];
             finalUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/preview?rm=minimal`;
         } 
         else if (url.includes("docs.google.com/presentation")) {
-            // Google Slides Bypass
             let slideId = url.split('/d/')[1].split('/')[0];
             finalUrl = `https://docs.google.com/presentation/d/${slideId}/embed?rm=minimal`;
         } 
         else if (url.includes("docs.google.com/document")) {
-            // Google Docs Bypass
             let docId = url.split('/d/')[1].split('/')[0];
             finalUrl = `https://docs.google.com/document/d/${docId}/preview`;
         }
         else if (url.includes("drive.google.com/file/d/")) {
-            // File Umum di Drive (PDF, Word, Video, Excel, dll)
             let fileId = url.split('/file/d/')[1].split('/')[0];
             finalUrl = `https://drive.google.com/file/d/${fileId}/preview`;
         } 
         else if (url.includes("drive.google.com/drive/folders/")) {
-            // Folder Drive Bypass
             let folderId = url.split('/folders/')[1].split('?')[0];
             finalUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
         }
 
+        // Kirim data lengkap termasuk url asli sebelum di-bypass
         await channelRealtime.send({
             type: 'broadcast',
             event: 'update_doc',
-            payload: { url: finalUrl, type: 'link', ext: '' }
+            payload: { url: finalUrl, type: 'link', ext: '', originalUrl: url }
         });
         
         alert("Link sukses disiarkan!");
@@ -325,9 +355,20 @@
 
     function tampilkanDokumen(payload) {
         const box = document.getElementById('contentBox');
+        const linkContainer = document.getElementById('linkContainer');
+        const directLink = document.getElementById('directLink');
+        
         box.innerHTML = "";
         box.style.background = "#ffffff";
         box.style.padding = "25px";
+        
+        // Manajemen Tombol Link Otomatis
+        if (payload.originalUrl) {
+            linkContainer.style.display = "block";
+            directLink.href = payload.originalUrl;
+        } else {
+            linkContainer.style.display = "none";
+        }
 
         const ext = payload.ext ? payload.ext.toLowerCase() : '';
 
@@ -366,7 +407,6 @@
                     }
                 })
                 .catch(err => {
-                    // Jika pembacaan lokal gagal, oper ke Microsoft Office Live Viewer yang stabil
                     box.style.background = "transparent";
                     box.style.padding = "0";
                     box.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}"></iframe>`;
