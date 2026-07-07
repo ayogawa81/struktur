@@ -6,7 +6,7 @@
     <title>Universal Document Viewer</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <style>
-        /* Desain Modern & Responsive (Bisa menyesuaikan layar TV, PC, maupun HP) */
+        /* Desain Modern & Kontras Tinggi (Sangat Ramah untuk TV, PC, dan HP) */
         body {
             font-family: 'Segoe UI', Arial, sans-serif;
             margin: 0;
@@ -58,7 +58,7 @@
 
         .btn-source:hover { background-color: #c0392b; }
 
-        /* Input Link Cloud (Google Drive / Dropbox) */
+        /* Input Link Cloud (Google Drive, Sheets, Dropbox) */
         .cloud-input-group {
             display: flex;
             gap: 5px;
@@ -85,6 +85,7 @@
             cursor: pointer;
             font-weight: bold;
         }
+        .btn-cloud:hover { background-color: #27ae60; }
 
         /* Area Tampilan Dokumen */
         .viewer-area {
@@ -98,18 +99,19 @@
         /* Box Konten Dokumen (Tulisan Besar otomatis disesuaikan untuk TV/HP) */
         .content-box {
             width: 100%;
-            max-width: 1000px;
+            max-width: 1100px;
             background: #ffffff;
             color: #222222;
             padding: 30px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-            font-size: 24px; /* Ukuran default besar agar terbaca di TV, tapi fleksibel */
+            font-size: 24px; /* Default besar agar terbaca jelas di TV */
             line-height: 1.6;
             display: none;
             overflow-x: auto;
         }
 
+        /* Styling Iframe agar bersih dan memenuhi layar pratinjau */
         iframe {
             width: 100%;
             height: 75vh;
@@ -126,10 +128,10 @@
             border-radius: 6px;
         }
 
-        /* Responsivitas untuk Layar HP */
+        /* Responsivitas Otomatis untuk Layar HP */
         @media (max-width: 600px) {
             .content-box {
-                font-size: 16px; /* Mengecil di HP agar tidak terlalu raksasa */
+                font-size: 16px; /* Ukuran mengecil di HP agar tidak terlalu raksasa */
                 padding: 15px;
             }
             .title { font-size: 18px; }
@@ -150,7 +152,7 @@
         </div>
 
         <div class="cloud-input-group">
-            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Paste link Google Drive / Cloud publik...">
+            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Paste link Google Sheets / Cloud publik...">
             <button class="btn-cloud" onclick="viewFromCloud()">Buka</button>
         </div>
 
@@ -166,9 +168,9 @@
 <script>
     const contentBox = document.getElementById('contentBox');
 
-    // ==========================================
-    // 1. MEMPROSES FILE DARI HP / PC (LOKAL)
-    // ==========================================
+    // ===================================================
+    // 1. MEMPROSES FILE DARI LOKAL (PC / MEMORI HP)
+    // ===================================================
     document.getElementById('fileInput').addEventListener('change', function(event) {
         const file = event.target.files[0];
         resetViewer();
@@ -188,7 +190,7 @@
                         contentBox.innerHTML = `<div class="large-text">${result.value}</div>`;
                         adjustTextSize();
                     })
-                    .catch(err => alert("Gagal membaca Word: " + err.message));
+                    .catch(err => alert("Gagal membaca file Word: " + err.message));
             };
             reader.readAsArrayBuffer(file);
         } 
@@ -203,28 +205,37 @@
         }
     });
 
-    // ==========================================
-    // 2. MEMPROSES FILE DARI LINK CLOUD STORAGE
-    // ==========================================
+    // ===================================================
+    // 2. MEMPROSES FILE DARI TAUTAN CLOUD STORAGE
+    // ===================================================
     function viewFromCloud() {
         let url = document.getElementById('cloudUrl').value.trim();
         if (!url) return alert("Masukkan URL Cloud terlebih dahulu!");
 
         resetViewer();
 
-        // Antisipasi otomatis jika pengguna memasukkan link sharing Google Drive standar
-        if (url.includes("drive.google.com")) {
-            // Mengubah link sharing Google Drive biasa menjadi format direct preview/embed
-            url = url.replace(/\/view\?usp=sharing|\/view/g, "/preview");
-            renderIframe(url);
-        } else {
-            // Menggunakan Google Docs Viewer API untuk link cloud publik umum (Dropbox, OneDrive, Hosting, dll)
+        // A. PENANGANAN OTOMATIS JIKA INPUT ADALAH GOOGLE SPREADSHEET / SHEET
+        if (url.includes("docs.google.com/spreadsheets")) {
+            // Memotong link asal dan memaksa format ke penampil web interaktif (/pubhtml)
+            let baseSpreadsheetUrl = url.split('/edit')[0];
+            let spreadsheetEmbedUrl = `${baseSpreadsheetUrl}/pubhtml?widget=true&headers=false`;
+            renderIframe(spreadsheetEmbedUrl);
+        } 
+        // B. PENANGANAN JIKA INPUT ADALAH GOOGLE DOCS / SLIDES / DRIVE LAINNYA
+        else if (url.includes("drive.google.com") || url.includes("docs.google.com")) {
+            // Mengubah parameter sharing biasa menjadi format preview iframe yang diizinkan oleh Google
+            let embedUrl = url.replace(/\/view\?usp=sharing|\/view|\/edit\?usp=sharing|\/edit/g, "/preview");
+            renderIframe(embedUrl);
+        } 
+        // C. JIKA LINK CLOUD LUAR (Dropbox, OneDrive, Hosting Publik, dll)
+        else {
+            // Menggunakan Google Docs Viewer API pihak ketiga sebagai jembatan pembaca otomatis
             const proxyUrl = `https://docs.google.com/gview?url=${encodeURIComponent(url)}&embedded=true`;
             renderIframe(proxyUrl);
         }
     }
 
-    // Helper Functions
+    // Fungsi Pembantu (Helpers)
     function resetViewer() {
         contentBox.innerHTML = "";
         contentBox.style.display = "block";
@@ -239,7 +250,7 @@
     }
 
     function adjustTextSize() {
-        // Jika layar lebar (seperti TV), paksa teks dokumen berukuran besar agar terbaca jauh
+        // Jika dibuka di TV/PC (Layar Lebar), perbesar font teks dokumen lokal secara otomatis
         if (window.innerWidth > 1024) {
             document.querySelectorAll('.large-text *').forEach(el => {
                 el.style.fontSize = "26px";
