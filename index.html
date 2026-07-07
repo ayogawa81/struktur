@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Universal Real-Time TV Monitor - KORPASGAT</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
@@ -106,7 +107,7 @@
             max-width: 1200px;
             background: #ffffff;
             color: #222222;
-            padding: 30px;
+            padding: 25px;
             border-radius: 10px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             font-size: 20px;
@@ -114,7 +115,7 @@
             min-height: 400px;
             transition: all 0.3s;
             box-sizing: border-box;
-            overflow: hidden;
+            overflow: auto;
         }
         
         .content-box:fullscreen {
@@ -122,17 +123,10 @@
             width: 100vw !important;
             height: 100vh !important;
             border-radius: 0 !important;
-            padding: 0 !important;
+            padding: 15px !important;
             background-color: #ffffff;
         }
-        .content-box:fullscreen iframe {
-            height: 100vh !important;
-            border-radius: 0 !important;
-        }
-        .content-box:fullscreen img {
-            max-height: 100vh !important;
-        }
-
+        
         iframe {
             width: 100%;
             height: 75vh;
@@ -141,6 +135,7 @@
             background: white;
             display: block;
         }
+        
         .status-tv {
             font-size: 13px;
             color: #2ecc71;
@@ -150,6 +145,29 @@
             display: inline-block;
             padding: 4px 12px;
             border-radius: 20px;
+        }
+
+        /* Styling Tabel Excel Responsif untuk TV Monitor */
+        .excel-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 16px;
+            color: #111111;
+            background: #ffffff;
+            margin-top: 10px;
+        }
+        .excel-table th, .excel-table td {
+            border: 1px solid #b0b0b0;
+            padding: 12px 14px;
+            text-align: left;
+        }
+        .excel-table th {
+            background-color: #2980b9 !important;
+            color: white !important;
+            font-weight: bold;
+        }
+        .excel-table tr:nth-child(even) {
+            background-color: #f8fafd;
         }
     </style>
 </head>
@@ -227,7 +245,8 @@
 
         const extension = file.name.split('.').pop().toLowerCase();
         const uniqueTime = new Date().getTime();
-        const secureFileName = `monitor_${uniqueTime}.${extension}`;
+        // Memaksa penulisan nama file agar mudah dibaca oleh render engine eksternal
+        const secureFileName = `doc_${uniqueTime}.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
@@ -290,17 +309,15 @@
         const box = document.getElementById('contentBox');
         box.innerHTML = "";
         box.style.background = "#ffffff";
-        box.style.padding = "30px";
+        box.style.padding = "25px";
 
         const ext = payload.ext ? payload.ext.toLowerCase() : '';
 
-        // JALUR UTAMA UNTUK LINK / WEBSITE UMUM
         if (payload.type === 'link') {
             box.style.background = "transparent";
             box.style.padding = "0";
             box.innerHTML = `<iframe src="${payload.url}"></iframe>`;
         } 
-        // UTAMA: Mammoth Tetap Berjalan Sempurna untuk file Word .docx di Tizen TV Anda
         else if (ext === 'docx') {
             fetch(payload.url).then(res => res.arrayBuffer()).then(buffer => {
                 mammoth.convertToHtml({arrayBuffer: buffer}).then(result => {
@@ -310,28 +327,56 @@
                 box.innerHTML = `<p style="text-align:center; color:#e74c3c;">Gagal membaca file Word</p>`;
             });
         } 
-        // TERBARU: SOLUSI MUTLAK UNTUK EXCEL, PPT, DAN PDF (Agar Tizen TV & HP Tidak Otomatis Download)
-        else if (['xlsx', 'xls', 'pptx', 'ppt', 'pdf'].includes(ext)) {
+        // FIX TOTAL EXCEL: Render tabel HTML murni langsung di browser TV/HP tanpa Google Viewer
+        else if (['xlsx', 'xls'].includes(ext)) {
+            fetch(payload.url)
+                .then(res => {
+                    if (!res.ok) throw new Error("File tidak ditemukan di storage.");
+                    return res.arrayBuffer();
+                })
+                .then(buffer => {
+                    const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
+                    const sheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[sheetName];
+                    
+                    const htmlTable = XLSX.utils.sheet_to_html(worksheet);
+                    box.innerHTML = `<div style="width:100%; overflow-x:auto;">${htmlTable}</div>`;
+                    
+                    const tableEl = box.querySelector('table');
+                    if (tableEl) {
+                        tableEl.classList.add('excel-table');
+                        tableEl.removeAttribute('border');
+                    }
+                })
+                .catch(err => {
+                    box.innerHTML = `<p style="text-align:center; color:#e74c3c; font-size:18px;">Gagal menampilkan Excel: Berkas dilindungi atau format tidak sesuai.</p>`;
+                });
+        } 
+        // FIX TOTAL PPTX & PPT: Menggunakan Jalur Alternatif Office Live Embed (Kompatibel Tizen TV & HP)
+        else if (['pptx', 'ppt'].includes(ext)) {
             box.style.background = "transparent";
             box.style.padding = "0";
-            
-            // Integrasi Google Docs Viewer Engine (Memaksa Render Dokumen Menjadi Web Ringan)
-            const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(payload.url)}&embedded=true`;
-            box.innerHTML = `<iframe src="${googleViewerUrl}"></iframe>`;
+            // Menggunakan Office Live Viewer bawaan Microsoft yang lolos sensor security di TV Tizen
+            const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}`;
+            box.innerHTML = `<iframe src="${officeViewerUrl}"></iframe>`;
         } 
-        // PENANGANAN GAMBAR
+        else if (ext === 'pdf') {
+            box.style.background = "transparent";
+            box.style.padding = "0";
+            // PDF menggunakan pencucian query agar tidak ditolak enkripsinya oleh browser TV
+            const pdfViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(payload.url)}&embedded=true`;
+            box.innerHTML = `<iframe src="${pdfViewerUrl}"></iframe>`;
+        }
         else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
             box.style.background = "transparent";
             box.style.padding = "0";
             box.innerHTML = `<img src="${payload.url}?t=${new Date().getTime()}" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">`;
         } 
-        // PENANGANAN FILE TEKS
         else if (ext === 'txt') {
             fetch(payload.url).then(res => res.text()).then(text => {
                 box.innerHTML = `<pre style="white-space: pre-wrap; font-size:22px; color:#222; text-align:left; font-family:monospace;">${text}</pre>`;
             });
         } 
-        // FALLBACK GLOBAL
         else {
             box.style.background = "transparent";
             box.style.padding = "0";
