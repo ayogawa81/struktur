@@ -149,7 +149,7 @@
 </div>
 
 <script>
-    // PERBAIKAN URL DASAR: Menghapus sub-folder /rest/v1/ agar SDK memetakan API Storage dengan valid
+    // FIX URL: Menggunakan URL Proyek utama yang bersih agar pemetaan endpoint SDK berjalan otomatis
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
@@ -188,10 +188,10 @@
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // FIX MUTLAK: Mengubah target penulisan bucket menjadi 'DOKUMEN' (Huruf Kapital) sesuai dashboard Supabase
+            // LOCK BUCKET: Tetap mengacu ke 'dokumen' (huruf kecil) sesuai nama aktual bucket Anda di storage
             const { data, error } = await supabaseClient
                 .storage
-                .from('DOKUMEN')
+                .from('dokumen')
                 .upload(secureFileName, file, { 
                     cacheControl: '3600',
                     upsert: true
@@ -199,7 +199,7 @@
 
             if (error) throw error;
 
-            const { data: urlData } = supabaseClient.storage.from('DOKUMEN').getPublicUrl(secureFileName);
+            const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
 
             await supabaseClient.channel('tv_channel').send({
                 type: 'broadcast',
@@ -211,7 +211,7 @@
             document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #2ecc71; font-size: 18px;">File sukses dikirim!</p>';
         } catch (error) {
             alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Pastikan nama bucket di script sesuai.</p>';
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa kembali konfigurasi RLS bucket Anda.</p>';
         }
     });
 
