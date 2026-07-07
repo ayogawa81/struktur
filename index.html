@@ -37,7 +37,7 @@
             gap: 12px;
             justify-content: center;
             align-items: center;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
         .btn-source {
@@ -53,11 +53,12 @@
             transition: background 0.2s;
         }
         .btn-source:hover { background-color: #c0392b; }
+        
         .cloud-input-group {
             display: flex;
             gap: 5px;
             width: 100%;
-            max-width: 500px;
+            max-width: 450px;
         }
         .cloud-input {
             flex: 1;
@@ -79,6 +80,21 @@
             transition: background 0.2s;
         }
         .btn-cloud:hover { background-color: #27ae60; }
+
+        /* Tombol Full Screen Modern */
+        .btn-fullscreen {
+            background-color: #f39c12;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 15px;
+            transition: background 0.2s;
+        }
+        .btn-fullscreen:hover { background-color: #d35400; }
+
         .viewer-area {
             flex: 1;
             padding: 25px;
@@ -98,7 +114,25 @@
             line-height: 1.6;
             min-height: 300px;
             transition: all 0.3s;
+            box-sizing: border-box;
         }
+        
+        /* Modifikasi Khusus saat Mode Layar Penuh Aktif */
+        .content-box:fullscreen {
+            max-width: 100% !important;
+            width: 100vw !important;
+            height: 100vh !important;
+            border-radius: 0 !important;
+            padding: 15px !important;
+            background-color: #ffffff;
+        }
+        .content-box:fullscreen iframe {
+            height: 95vh !important;
+        }
+        .content-box:fullscreen img {
+            max-height: 95vh !important;
+        }
+
         iframe {
             width: 100%;
             height: 72vh;
@@ -132,6 +166,7 @@
             <input type="url" id="cloudUrl" class="cloud-input" placeholder="Masukkan Tautan Google Sheets / Slides / Drive / Web...">
             <button class="btn-cloud" onclick="kirimTautan()">Kirim Link</button>
         </div>
+        <button class="btn-fullscreen" onclick="toggleFullScreen()">🖥️ Full Screen</button>
     </div>
     <div class="status-tv" id="koneksiStatus">Menghubungkan ke Sistem Jaringan...</div>
 </div>
@@ -144,7 +179,7 @@
 
 <script>
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3wW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
     let supabaseClient = null;
     let channelRealtime = null;
@@ -158,9 +193,8 @@
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Otomatis Terhubung 🟢";
             
-            // Inisialisasi channel broadcast global
             channelRealtime = supabaseClient.channel('tv_channel', {
-                config: { broadcast: { self: true } } // Izinkan pengirim melihat hasilnya sendiri untuk tes langsung
+                config: { broadcast: { self: true } }
             });
 
             channelRealtime.on('broadcast', { event: 'update_doc' }, (response) => {
@@ -171,6 +205,18 @@
 
         } catch (e) {
             document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung ke Cloud Server 🔴";
+        }
+    }
+
+    // Fungsi Pengendali Full Screen Konten Utama
+    function toggleFullScreen() {
+        const targetVisual = document.getElementById("contentBox");
+        if (!document.fullscreenElement) {
+            targetVisual.requestFullscreen().catch(err => {
+                alert(`Gagal mengaktifkan mode Full Screen: ${err.message}`);
+            });
+        } else {
+            document.exitFullscreen();
         }
     }
 
@@ -186,23 +232,19 @@
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // Proses unggah ke folder 'dokumen'
             const { data, error } = await supabaseClient
                 .storage
                 .from('dokumen')
                 .upload(secureFileName, file, { 
-                    cacheControl: '0', // Set ke 0 agar gambar tidak tertahan cache server lama
+                    cacheControl: '0', 
                     upsert: true
                 });
 
             if (error) throw error;
 
-            // Dapatkan URL publik file hasil unggahan
             const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
-
             if (!urlData || !urlData.publicUrl) throw new Error("Gagal generate link publik.");
 
-            // PERBAIKAN UTAMA: Kirim data muatan lengkap ke seluruh TV Monitor
             await channelRealtime.send({
                 type: 'broadcast',
                 event: 'update_doc',
@@ -265,7 +307,6 @@
         } else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
             box.style.background = "transparent";
             box.style.padding = "0";
-            // Tampilkan gambar penuh di tengah layar monitor TV
             box.innerHTML = `<img src="${payload.url}?t=${new Date().getTime()}" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">`;
         } else if (ext === 'txt') {
             fetch(payload.url).then(res => res.text()).then(text => {
