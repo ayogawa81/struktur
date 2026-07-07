@@ -149,7 +149,8 @@
 </div>
 
 <script>
-    const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co/rest/v1/";
+    // PERBAIKAN URL DASAR: Menghapus sub-folder /rest/v1/ agar SDK memetakan API Storage dengan valid
+    const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
     const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
     let supabaseClient = null;
@@ -187,10 +188,10 @@
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // Menggunakan nama bucket huruf kecil 'dokumen' secara konsisten
+            // FIX MUTLAK: Mengubah target penulisan bucket menjadi 'DOKUMEN' (Huruf Kapital) sesuai dashboard Supabase
             const { data, error } = await supabaseClient
                 .storage
-                .from('dokumen')
+                .from('DOKUMEN')
                 .upload(secureFileName, file, { 
                     cacheControl: '3600',
                     upsert: true
@@ -198,7 +199,7 @@
 
             if (error) throw error;
 
-            const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
+            const { data: urlData } = supabaseClient.storage.from('DOKUMEN').getPublicUrl(secureFileName);
 
             await supabaseClient.channel('tv_channel').send({
                 type: 'broadcast',
