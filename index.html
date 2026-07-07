@@ -3,122 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PDF Viewer untuk TV</title>
+    <title>Online Document Viewer</title>
     <style>
-        body, html {
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            background-color: #222;
-            color: white;
-            font-family: Arial, sans-serif;
-            overflow: hidden;
+            padding: 20px;
+            background-color: #f4f6f9;
+            color: #333;
         }
-        #controls {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            background-color: #111;
-            padding: 15px 0;
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h2 {
             text-align: center;
-            z-index: 10;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.7);
+            color: #2c3e50;
+        }
+        .input-group {
+            margin-bottom: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        input[type="url"] {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
         }
         button {
-            background-color: #0056b3;
+            padding: 10px 20px;
+            background-color: #3498db;
             color: white;
             border: none;
-            padding: 12px 25px;
-            font-size: 18px;
-            font-weight: bold;
-            border-radius: 5px;
+            border-radius: 4px;
             cursor: pointer;
-            margin: 0 10px;
-            transition: 0.2s;
+            font-size: 16px;
+            transition: background 0.3s;
         }
-        button:hover { background-color: #007bff; }
-        .btn-active { background-color: #dc3545 !important; } /* Warna merah saat auto-scroll aktif */
-        #container {
-            width: 100%;
-            height: calc(100% - 80px);
-            margin-top: 80px;
-            overflow-y: auto; /* Memungkinkan container luar untuk di-scroll */
-            scroll-behavior: smooth;
+        button:hover {
+            background-color: #2980b9;
+        }
+        .viewer-container {
+            margin-top: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            overflow: hidden;
+            display: none; /* Sembunyikan sampai ada dokumen yg dimuat */
         }
         iframe {
             width: 100%;
-            height: 4000px; /* Diperpanjang agar PDF panjang terlihat utuh dalam Google Viewer */
+            height: 600px;
             border: none;
-            transform-origin: top center;
-            transition: transform 0.2s ease;
+        }
+        .note {
+            font-size: 13px;
+            color: #7f8c8d;
+            margin-top: 5px;
         }
     </style>
 </head>
 <body>
 
-    <div id="controls">
-        <button onclick="zoomIn()">Perbesar (+)</button>
-        <button onclick="zoomOut()">Perkecil (-)</button>
-        <button id="scrollBtn" onclick="toggleAutoScroll()">Mulai Gulir Otomatis</button>
+<div class="container">
+    <h2>Online Document Viewer 📄✨</h2>
+    <p style="text-align: center;">Membaca file PPTX, DOCX, XLSX, atau PDF langsung di browser.</p>
+    
+    <div class="input-group">
+        <input type="url" id="docUrl" placeholder="Masukkan URL dokumen publik (contoh: https://example.com/file.pptx)">
+        <button onclick="viewDocument()">Buka Dokumen</button>
     </div>
+    <p class="note">*Catatan: File harus bersifat publik (bisa diakses internet) agar Google Viewer bisa membacanya.</p>
 
-    <div id="container">
-        <!-- GANTI URL DI BAWAH INI DENGAN LINK PDF PUBLIK ANDA -->
-        <iframe id="pdfFrame" src="https://google.com"></iframe>
+    <div class="viewer-container" id="viewerContainer">
+        <iframe id="docViewer" src=""></iframe>
     </div>
+</div>
 
-    <script>
-        var frame = document.getElementById('pdfFrame');
-        var container = document.getElementById('container');
-        var scrollBtn = document.getElementById('scrollBtn');
-        
-        var zoomLevel = 1.0;
-        var scrollInterval = null;
-        var isScrolling = false;
-        var scrollSpeed = 1; // Menggulung sebesar 1 pixel tiap interval
+<script>
+    function viewDocument() {
+        const urlInput = document.getElementById('docUrl').value.trim();
+        const viewerContainer = document.getElementById('viewerContainer');
+        const iframe = document.getElementById('docViewer');
 
-        // Fungsi Zoom Kontrol
-        function zoomIn() {
-            zoomLevel += 0.15;
-            applyZoom();
+        if (urlInput === "") {
+            alert("Silakan masukkan URL dokumen terlebih dahulu!");
+            return;
         }
 
-        function zoomOut() {
-            if (zoomLevel > 0.4) {
-                zoomLevel -= 0.15;
-                applyZoom();
-            }
-        }
+        // Menggunakan Google Docs Viewer API
+        // Encode URL agar karakter khusus aman dibaca oleh browser
+        const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(urlInput)}&embedded=true`;
 
-        function applyZoom() {
-            frame.style.transform = 'scale(' + zoomLevel + ')';
-        }
+        // Set src iframe dan tampilkan container
+        iframe.src = googleViewerUrl;
+        viewerContainer.style.display = "block";
+    }
+</script>
 
-        // Fungsi Otomatis Gulir Halaman (Auto-Scroll)
-        function toggleAutoScroll() {
-            if (isScrolling) {
-                clearInterval(scrollInterval);
-                scrollBtn.innerText = "Mulai Gulir Otomatis";
-                scrollBtn.classList.remove('btn-active');
-                isScrolling = false;
-            } else {
-                scrollBtn.innerText = "Berhentikan Gulir";
-                scrollBtn.classList.add('btn-active');
-                isScrolling = true;
-                
-                // Menjalankan scroll setiap 40 milidetik
-                scrollInterval = setInterval(function() {
-                    container.scrollTop += scrollSpeed;
-                    
-                    // Jika sudah mencapai ujung bawah dokumen, kembali ke atas otomatis
-                    if (container.scrollTop + container.clientHeight >= container.scrollHeight - 2) {
-                        container.scrollTop = 0;
-                    }
-                }, 40); 
-            }
-        }
-    </script>
 </body>
 </html>
