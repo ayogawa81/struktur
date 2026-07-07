@@ -216,10 +216,10 @@
 
         // A. PENANGANAN OTOMATIS JIKA INPUT ADALAH GOOGLE SPREADSHEET / SHEET
         if (url.includes("docs.google.com/spreadsheets")) {
-            // Memotong link asal dan memaksa format ke penampil web interaktif (/pubhtml)
+            // Mengubah ujung link /edit menjadi /preview dengan parameter minimal agar tidak memicu error terbitan
             let baseSpreadsheetUrl = url.split('/edit')[0];
-            let spreadsheetEmbedUrl = `${baseSpreadsheetUrl}/pubhtml?widget=true&headers=false`;
-            renderIframe(spreadsheetEmbedUrl);
+            let spreadsheetPreviewUrl = `${baseSpreadsheetUrl}/preview?rm=minimal`;
+            renderIframe(spreadsheetPreviewUrl);
         } 
         // B. PENANGANAN JIKA INPUT ADALAH GOOGLE DOCS / SLIDES / DRIVE LAINNYA
         else if (url.includes("drive.google.com") || url.includes("docs.google.com")) {
