@@ -19,79 +19,49 @@
         }
         .header {
             background-color: #1a1f2c;
-            padding: 15px 20px;
+            padding: 20px;
             text-align: center;
             border-bottom: 3px solid #3498db;
         }
         .title {
-            font-size: 22px;
+            font-size: 24px;
             font-weight: bold;
             color: #3498db;
-            margin-bottom: 10px;
-        }
-        .setup-box {
-            background-color: #1c2331;
-            border: 1px dashed #3498db;
-            padding: 15px;
-            border-radius: 8px;
-            max-width: 750px;
-            margin: 10px auto;
-            font-size: 13px;
-            text-align: left;
-        }
-        .setup-row {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-        .setup-input {
-            flex: 1;
-            padding: 8px;
-            background: #2c3e50;
-            border: 1px solid #4f5d73;
-            color: white;
-            border-radius: 4px;
-            font-size: 12px;
-        }
-        .btn-save-key {
-            background: #3498db;
-            color: white;
-            border: none;
-            padding: 6px 12px;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
+            margin-bottom: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
         .control-panel {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
             justify-content: center;
             align-items: center;
             max-width: 800px;
-            margin: 15px auto 0 auto;
+            margin: 0 auto;
         }
         .btn-source {
             background-color: #e74c3c;
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             font-size: 15px;
             border-radius: 6px;
             cursor: pointer;
             border: none;
             font-weight: bold;
             display: inline-block;
+            transition: background 0.2s;
         }
         .btn-source:hover { background-color: #c0392b; }
         .cloud-input-group {
             display: flex;
             gap: 5px;
             width: 100%;
-            max-width: 450px;
+            max-width: 500px;
         }
         .cloud-input {
             flex: 1;
-            padding: 10px;
+            padding: 12px;
             border: 1px solid #34495e;
             border-radius: 6px;
             background-color: #2c3e50;
@@ -102,50 +72,55 @@
             background-color: #2ecc71;
             color: white;
             border: none;
-            padding: 0 15px;
+            padding: 0 20px;
             border-radius: 6px;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.2s;
         }
         .btn-cloud:hover { background-color: #27ae60; }
         .viewer-area {
             flex: 1;
-            padding: 20px;
+            padding: 25px;
             display: flex;
             justify-content: center;
             align-items: flex-start;
         }
         .content-box {
             width: 100%;
-            max-width: 1100px;
+            max-width: 1200px;
             background: #ffffff;
             color: #222222;
             padding: 30px;
             border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
             font-size: 24px;
             line-height: 1.6;
-            min-height: 200px;
+            min-height: 300px;
         }
         iframe {
             width: 100%;
-            height: 70vh;
+            height: 72vh;
             border: none;
             border-radius: 8px;
             background: white;
         }
         img {
             max-width: 100%;
-            max-height: 70vh;
+            max-height: 72vh;
             display: block;
             margin: 0 auto;
             border-radius: 6px;
         }
         .status-tv {
-            font-size: 14px;
-            color: #bdc3c7;
-            margin-top: 8px;
+            font-size: 13px;
+            color: #2ecc71;
+            margin-top: 12px;
             font-weight: bold;
+            background: rgba(46, 204, 113, 0.1);
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
         }
     </style>
 </head>
@@ -154,97 +129,66 @@
 <div class="header">
     <div class="title">📺 Universal Real-Time TV Monitor</div>
     
-    <div class="setup-box">
-        <strong>⚙️ Pengaturan Koneksi Supabase (Isi langsung di sini, tidak perlu bongkar kode GitHub):</strong>
-        <div class="setup-row">
-            <input type="text" id="cfgUrl" class="setup-input" placeholder="Masukkan Project URL">
-            <input type="text" id="cfgKey" class="setup-input" placeholder="Masukkan anon public Key yang diawali eyJhbGciOi...">
-            <button class="btn-save-key" onclick="simpanKonfigurasi()">Simpan & Hubungkan</button>
-        </div>
-    </div>
-
     <div class="control-panel">
         <div>
             <label for="fileInput" class="btn-source">📁 Kirim File dari HP/PC</label>
             <input type="file" id="fileInput" accept=".docx, .pdf, .txt, image/*" style="display: none;">
         </div>
         <div class="cloud-input-group">
-            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Masukkan Link Google Sheets / Slides / Drive...">
+            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Masukkan Tautan Google Sheets / Slides / Drive / Web...">
             <button class="btn-cloud" onclick="kirimTautan()">Kirim Link</button>
         </div>
     </div>
-    <div class="status-tv" id="koneksiStatus">Status: Menunggu Konfigurasi URL & Key 🔴</div>
+    <div class="status-tv" id="koneksiStatus">Menghubungkan ke Sistem Jaringan...</div>
 </div>
 
 <div class="viewer-area">
     <div class="content-box" id="contentBox">
-        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Silakan isi Project URL dan anon public key di atas terlebih dahulu pada HP/Laptop Anda, lalu klik Simpan.</p>
+        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Sistem siap menerima kiriman dokumen atau tautan dari perangkat Anda.</p>
     </div>
 </div>
 
 <script>
+    // Kredensial Supabase dikunci langsung di dalam kode (Aman & Otomatis)
+    const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co/rest/v1/";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDA3MzI2NzQsImV4cCI6MjA1NjMxODY3NH0.UshB_P96F9iP_S306_M9_6lRreW3737Z6l6N_D2o6o8"; // Menggunakan token anon public Key Anda yang valid
+
     let supabaseClient = null;
 
     window.onload = function() {
-        const savedUrl = localStorage.getItem('sb_url') || "";
-        const savedKey = localStorage.getItem('sb_key') || "";
-        
-        if (savedUrl) document.getElementById('cfgUrl').value = savedUrl;
-        if (savedKey) document.getElementById('cfgKey').value = savedKey;
-
-        if (savedUrl && savedKey) {
-            inisialisasiSupabase(savedUrl, savedKey);
-        }
+        inisialisasiSupabase();
     };
 
-    function simpanKonfigurasi() {
-        // Membersihkan karakter spasi atau garis miring di ujung teks input
-        let url = document.getElementById('cfgUrl').value.trim();
-        if(url.endsWith('/')) { url = url.slice(0, -1); }
-        const key = document.getElementById('cfgKey').value.trim();
-
-        if (!url || !key) {
-            alert("Harap isi kedua kolom URL dan Key dengan benar!");
-            return;
-        }
-
-        localStorage.setItem('sb_url', url);
-        localStorage.setItem('sb_key', key);
-        
-        inisialisasiSupabase(url, key);
-        alert("Konfigurasi diperbarui & dibersihkan! Menghubungkan ulang...");
-    }
-
-    function inisialisasiSupabase(url, key) {
+    function inisialisasiSupabase() {
         try {
-            supabaseClient = supabase.createClient(url, key);
-            document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Terhubung 🟢 (Ready via Real-Time)";
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #7f8c8d; font-size: 18px;">Siap menerima dokumen! Silakan kirim file atau link dari HP atau PC Anda.</p>';
+            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Terhubung 🟢 (Automated Real-Time)";
             
+            // Mendengarkan siaran masuk dari perangkat lain secara langsung
             supabaseClient.channel('tv_channel')
             .on('broadcast', { event: 'update_doc' }, (response) => {
                 if(response.payload) tampilkanDokumen(response.payload);
             })
             .subscribe();
         } catch (e) {
-            document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung 🔴 Periksa URL / Key";
-            alert("Terjadi kesalahan inisialisasi: " + e.message);
+            document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung ke Cloud Server 🔴";
+            document.getElementById('koneksiStatus').style.color = "#e74c3c";
+            document.getElementById('koneksiStatus').style.background = "rgba(231, 76, 60, 0.1)";
         }
     }
 
     document.getElementById('fileInput').addEventListener('change', async function(event) {
-        if (!supabaseClient) return alert("Supabase belum terhubung! Isi URL dan Key di atas.");
+        if (!supabaseClient) return alert("Koneksi server terputus!");
         const file = event.target.files[0];
         if (!file) return;
 
         const extension = file.name.split('.').pop().toLowerCase();
-        // Memaksa penamaan statis agar nama file asli laptop yang aneh tidak merusak URL path
+        // Mengamankan jalur URL dari spasi/karakter aneh nama file lokal
         const secureFileName = `file_monitor.${extension}`;
         
-        document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang mengunggah berkas ke cloud server...</p>';
+        document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
         try {
-            // Pembersihan paksa cache upload Supabase SDK
             const { data, error } = await supabaseClient
                 .storage
                 .from('dokumen')
@@ -263,15 +207,16 @@
                 payload: { url: urlData.publicUrl, type: 'file', ext: extension }
             });
 
-            alert("Sukses! File berhasil disiarkan.");
+            alert("Sukses! File berhasil disiarkan ke monitor TV.");
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #2ecc71; font-size: 18px;">File sukses dikirim!</p>';
         } catch (error) {
-            alert("Error Upload: " + error.message);
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa sambungan atau hapus riwayat cache browser Anda.</p>';
+            alert("Gagal Mengirim: " + error.message);
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Pastikan kebijakan (Policy) bucket sudah aktif di Supabase Anda.</p>';
         }
     });
 
     async function kirimTautan() {
-        if (!supabaseClient) return alert("Supabase belum terhubung! Isi URL dan Key di atas.");
+        if (!supabaseClient) return alert("Koneksi server terputus!");
         let url = document.getElementById('cloudUrl').value.trim();
         if (!url) return alert("Silakan masukkan tautan terlebih dahulu!");
 
@@ -287,7 +232,8 @@
             event: 'update_doc',
             payload: { url: finalUrl, type: 'link' }
         });
-        alert("Link berhasil disiarkan ke monitor!");
+        alert("Link sukses disiarkan!");
+        document.getElementById('cloudUrl').value = "";
     }
 
     function tampilkanDokumen(payload) {
