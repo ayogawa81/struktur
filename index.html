@@ -223,48 +223,37 @@
             .on('broadcast', { event: 'update_doc' }, (response) => {
                 if(response.payload) tampilkanDokumen(response.payload);
             })
-            .subscribe((status) => {
-                if (status === 'SUBSCRIBED') {
-                    console.log("Berhasil masuk ke jalur real-time broadcast!");
-                }
-            });
+            .subscribe();
         } catch (e) {
             document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung 🔴 Periksa URL / Key";
             alert("Terjadi kesalahan inisialisasi: " + e.message);
         }
     }
 
+    // KIRIM FILE MENGGUNAKAN SDK RESMI SUPABASE STORAGE (ANTI JALUR EROR)
     document.getElementById('fileInput').addEventListener('change', async function(event) {
         if (!supabaseClient) return alert("Supabase belum terhubung! Isi URL dan Key di atas.");
         const file = event.target.files[0];
         if (!file) return;
 
-        const url = localStorage.getItem('sb_url');
-        const key = localStorage.getItem('sb_key');
         const extension = file.name.split('.').pop().toLowerCase();
         const fileName = `monitor_file.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang mengunggah berkas ke cloud server...</p>';
 
         try {
-            const uploadUrl = `${url}/storage/v1/object/dokumen/${fileName}`;
-            const response = await fetch(uploadUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${key}`,
-                    'apikey': key,
-                    'x-upsert': 'true'
-                },
-                body: file
-            });
+            // Menggunakan fungsi .upload bawaan library agar jalurnya otomatis diverifikasi pas oleh sistem
+            const { data, error } = await supabaseClient
+                .storage
+                .from('dokumen')
+                .upload(fileName, file, { upsert: true });
 
-            if (!response.ok) {
-                const err = await response.json();
-                throw new Error(err.message || "Gagal mengunggah berkas ke Storage.");
-            }
+            if (error) throw error;
 
+            // Ambil URL publik file tersebut
             const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(fileName);
 
+            // Siarkan langsung ke TV monitor
             await supabaseClient.channel('tv_channel').send({
                 type: 'broadcast',
                 event: 'update_doc',
@@ -273,8 +262,8 @@
 
             alert("Sukses! File berhasil disiarkan.");
         } catch (error) {
-            alert("Error Upload: " + error.message + "\\n\\nSolusi: Pastikan di Dashboard Supabase -> menu Storage -> sudah dibuat Bucket bernama 'dokumen' (huruf kecil semua) dan diubah ke PUBLIC.");
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file karena masalah izin Storage.</p>';
+            alert("Error Upload: " + error.message + "\n\nCatatan: Pastikan di akun Supabase Anda sudah ada Bucket bernama 'dokumen' dengan akses PUBLIC.");
+            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file. Periksa perizinan bucket Supabase Anda.</p>';
         }
     });
 
