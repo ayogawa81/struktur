@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Online Document Viewer</title>
+    <title>Lokal Document Viewer</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 20px;
             background-color: #f4f6f9;
-            color: #333;
         }
         .container {
             max-width: 900px;
@@ -20,90 +20,103 @@
             border-radius: 8px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-        }
+        h2 { text-align: center; color: #2c3e50; }
         .input-group {
             margin-bottom: 20px;
-            display: flex;
-            gap: 10px;
+            padding: 20px;
+            border: 2px dashed #3498db;
+            border-radius: 6px;
+            background: #ecf0f1;
+            text-align: center;
         }
-        input[type="url"] {
-            flex: 1;
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+        input[type="file"] {
             font-size: 16px;
-        }
-        button {
-            padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
         }
         .viewer-container {
             margin-top: 20px;
             border: 1px solid #ddd;
             border-radius: 4px;
-            overflow: hidden;
-            display: none; /* Sembunyikan sampai ada dokumen yg dimuat */
+            padding: 20px;
+            min-height: 400px;
+            background: #fff;
+            overflow-y: auto;
+            display: none;
         }
         iframe {
             width: 100%;
             height: 600px;
             border: none;
         }
-        .note {
-            font-size: 13px;
-            color: #7f8c8d;
-            margin-top: 5px;
-        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>Online Document Viewer 📄✨</h2>
-    <p style="text-align: center;">Membaca file PPTX, DOCX, XLSX, atau PDF langsung di browser.</p>
+    <h2>Lokal Document Viewer 💻📄</h2>
+    <p style="text-align: center;">Pilih file dari PC Anda (Mendukung .docx, .pdf, .txt, dan gambar)</p>
     
     <div class="input-group">
-        <input type="url" id="docUrl" placeholder="Masukkan URL dokumen publik (contoh: https://example.com/file.pptx)">
-        <button onclick="viewDocument()">Buka Dokumen</button>
+        <input type="file" id="fileInput" accept=".docx, .pdf, .txt, image/*">
     </div>
-    <p class="note">*Catatan: File harus bersifat publik (bisa diakses internet) agar Google Viewer bisa membacanya.</p>
 
-    <div class="viewer-container" id="viewerContainer">
-        <iframe id="docViewer" src=""></iframe>
-    </div>
+    <div class="viewer-container" id="viewerContainer"></div>
 </div>
 
 <script>
-    function viewDocument() {
-        const urlInput = document.getElementById('docUrl').value.trim();
-        const viewerContainer = document.getElementById('viewerContainer');
-        const iframe = document.getElementById('docViewer');
+    document.getElementById('fileInput').addEventListener('change', function(event) {
+        const file = event.target.files[0];
+        const container = document.getElementById('viewerContainer');
+        container.innerHTML = ""; // Bersihkan tampilan sebelumnya
+        container.style.display = "block";
 
-        if (urlInput === "") {
-            alert("Silakan masukkan URL dokumen terlebih dahulu!");
-            return;
+        if (!file) return;
+
+        const fileType = file.name.split('.').pop().toLowerCase();
+
+        // 1. JIKA FILE ADALAH PDF
+        if (fileType === 'pdf') {
+            const fileURL = URL.createObjectURL(file);
+            container.innerHTML = `<iframe src="${fileURL}"></iframe>`;
+        } 
+        
+        // 2. JIKA FILE ADALAH WORD (.DOCX)
+        else if (fileType === 'docx') {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const arrayBuffer = event.target.result;
+                
+                // Menggunakan library Mammoth untuk konversi docx ke HTML
+                mammoth.convertToHtml({arrayBuffer: arrayBuffer})
+                    .then(function(result) {
+                        container.innerHTML = result.value; // Tampilkan hasil konversi
+                    })
+                    .catch(function(err) {
+                        container.innerHTML = "<p style='color:red;'>Gagal membaca file Word: " + err.message + "</p>";
+                    });
+            };
+            reader.readAsArrayBuffer(file);
+        } 
+        
+        // 3. JIKA FILE ADALAH NOTEPAD (.TXT)
+        else if (fileType === 'txt') {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                container.innerHTML = `<pre style="white-space: pre-wrap;">${event.target.result}</pre>`;
+            };
+            reader.readAsText(file);
+        } 
+        
+        // 4. JIKA FILE ADALAH GAMBAR
+        else if (['jpg', 'jpeg', 'png', 'gif'].includes(fileType)) {
+            const fileURL = URL.createObjectURL(file);
+            container.innerHTML = `<img src="${fileURL}" style="max-width:100%; height:auto; display:block; margin:0 auto;">`;
+        } 
+        
+        // JIKA FORMAT TIDAK DIDUKUNG LOKAL
+        else {
+            container.innerHTML = `<p style="color:red; text-align:center;">Format .${fileType} belum didukung untuk dibaca langsung dari PC secara lokal.</p>`;
         }
-
-        // Menggunakan Google Docs Viewer API
-        // Encode URL agar karakter khusus aman dibaca oleh browser
-        const googleViewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(urlInput)}&embedded=true`;
-
-        // Set src iframe dan tampilkan container
-        iframe.src = googleViewerUrl;
-        viewerContainer.style.display = "block";
-    }
+    });
 </script>
 
 </body>
