@@ -144,14 +144,14 @@
 
 <div class="viewer-area">
     <div class="content-box" id="contentBox">
-        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Sistem siap menerima kiriman dokumen atau tautan dari perangkat Anda.</p>
+        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Menunggu kiriman data/dokumen dari perangkat HP...</p>
     </div>
 </div>
 
 <script>
-    // Kredensial Supabase dikunci langsung di dalam kode (Aman & Otomatis)
+    // Kredensial Supabase Otomatis Terkunci
     const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co/rest/v1/";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU"; // Menggunakan token anon public Key Anda yang valid
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
 
     let supabaseClient = null;
 
@@ -162,9 +162,9 @@
     function inisialisasiSupabase() {
         try {
             supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Terhubung 🟢 (Automated Real-Time)";
+            document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Otomatis Terhubung 🟢";
             
-            // Mendengarkan siaran masuk dari perangkat lain secara langsung
+            // Berlangganan sistem Real-Time Broadcast
             supabaseClient.channel('tv_channel')
             .on('broadcast', { event: 'update_doc' }, (response) => {
                 if(response.payload) tampilkanDokumen(response.payload);
@@ -183,8 +183,10 @@
         if (!file) return;
 
         const extension = file.name.split('.').pop().toLowerCase();
-        // Mengamankan jalur URL dari spasi/karakter aneh nama file lokal
-        const secureFileName = `file_monitor.${extension}`;
+        
+        // Perbaikan Utama: Menggunakan skema nama acak berbasis waktu unik agar jalur URL dijamin valid oleh server
+        const uniqueTime = new Date().getTime();
+        const secureFileName = `monitor_${uniqueTime}.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
@@ -193,8 +195,8 @@
                 .storage
                 .from('dokumen')
                 .upload(secureFileName, file, { 
-                    upsert: true,
-                    contentType: file.type
+                    cacheControl: '3600',
+                    upsert: true
                 });
 
             if (error) throw error;
