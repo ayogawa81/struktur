@@ -184,35 +184,55 @@
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
     const contentBox = document.getElementById('contentBox');
 
-    // ===================================================
-    // 1. PROSES UPLOAD FILE DARI PERANGKAT (HP / PC)
-    // ===================================================
+    // =========================================================================
+    // 1. PROSES UPLOAD FILE DARI PERANGKAT (HP / PC) - VERSI STABIL HTTPS
+    // =========================================================================
     document.getElementById('fileInput').addEventListener('change', async function(event) {
         const file = event.target.files[0];
         if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) { 
+            return alert("Gagal: Ukuran file terlalu besar! Maksimal adalah 5 MB.");
+        }
 
         alert("Sedang mentransfer file ke cloud, mohon tunggu sebentar...");
         const extension = file.name.split('.').pop().toLowerCase();
         const fileName = `remote_doc.${extension}`;
 
-        // Mengunggah langsung dan menimpa file lama (upsert: true) di dalam Bucket 'dokumen'
-        const { data, error } = await supabase.storage
-            .from('dokumen')
-            .upload(fileName, file, { upsert: true });
+        try {
+            // Menggunakan metode Fetch API HTTPS standar agar lolos dari blokir keamanan browser
+            const uploadUrl = `${SUPABASE_URL}/storage/v1/object/dokumen/${fileName}`;
+            
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                headers: {
+                    'Authorization': `Bearer ${SUPABASE_KEY}`,
+                    'apikey': SUPABASE_KEY,
+                    'x-upsert': 'true'
+                },
+                body: file
+            });
 
-        if (error) {
-            alert("Transfer file gagal: " + error.message);
-        } else {
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.message || "Akses ditolak oleh Server Storage.");
+            }
+
             // Dapatkan URL publik dari berkas yang diupload
             const { data: urlData } = supabase.storage.from('dokumen').getPublicUrl(fileName);
             
-            // Mengirimkan instruksi Broadcast real-time agar layar TV yang stanby langsung memproses file
+            // Mengirimkan instruksi Broadcast real-time agar layar TV stanby langsung merespons
             await supabase.channel('tv_channel').send({
                 type: 'broadcast',
                 event: 'update_doc',
                 payload: { url: urlData.publicUrl, type: 'file', ext: extension }
             });
-            alert("File berhasil dikirim dan ditampilkan ke TV!");
+            
+            alert("File sukses dikirim dan langsung tayang di monitor TV!");
+
+        } catch (error) {
+            console.error("Detail Error:", error);
+            alert("Transfer file gagal: " + error.message + "\n\nPastikan Bucket bernama 'dokumen' sudah di-set PUBLIC dan POLICIES Insert/Upload sudah diaktifkan di Supabase.");
         }
     });
 
