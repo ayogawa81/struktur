@@ -147,7 +147,6 @@
             border-radius: 20px;
         }
 
-        /* Styling Tabel Excel Responsif untuk TV Monitor */
         .excel-table {
             width: 100%;
             border-collapse: collapse;
@@ -245,8 +244,7 @@
 
         const extension = file.name.split('.').pop().toLowerCase();
         const uniqueTime = new Date().getTime();
-        // Memaksa penulisan nama file agar mudah dibaca oleh render engine eksternal
-        const secureFileName = `doc_${uniqueTime}.${extension}`;
+        const secureFileName = `${uniqueTime}.${extension}`;
         
         document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
 
@@ -277,7 +275,7 @@
             alert("Sukses! File berhasil dikirim.");
         } catch (error) {
             alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file.</p>';
+            document.getElementById('contentBox').innerHTML = `<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file: ${error.message}</p>`;
         }
     });
 
@@ -287,12 +285,32 @@
         if (!url) return alert("Silakan masukkan tautan terlebih dahulu!");
 
         let finalUrl = url;
+        
+        // ENGINE DETEKSI & PARSING KHUSUS LINK GOOGLE DRIVE BYPASS COOKIE SECURITY
         if (url.includes("docs.google.com/spreadsheets")) {
-            finalUrl = `${url.split('/edit')[0]}/preview?rm=minimal`;
-        } else if (url.includes("docs.google.com/presentation")) {
-            finalUrl = url.replace(/\/edit\?usp=sharing|\/edit|\/pub/g, "/embed");
-        } else if (url.includes("drive.google.com") || url.includes("docs.google.com")) {
-            finalUrl = url.replace(/\/view\?usp=sharing|\/view|\/edit\?usp=sharing|\/edit/g, "/preview");
+            // Google Sheets Bypass
+            let sheetId = url.split('/d/')[1].split('/')[0];
+            finalUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/preview?rm=minimal`;
+        } 
+        else if (url.includes("docs.google.com/presentation")) {
+            // Google Slides Bypass
+            let slideId = url.split('/d/')[1].split('/')[0];
+            finalUrl = `https://docs.google.com/presentation/d/${slideId}/embed?rm=minimal`;
+        } 
+        else if (url.includes("docs.google.com/document")) {
+            // Google Docs Bypass
+            let docId = url.split('/d/')[1].split('/')[0];
+            finalUrl = `https://docs.google.com/document/d/${docId}/preview`;
+        }
+        else if (url.includes("drive.google.com/file/d/")) {
+            // File Umum di Drive (PDF, Word, Video, Excel, dll)
+            let fileId = url.split('/file/d/')[1].split('/')[0];
+            finalUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+        } 
+        else if (url.includes("drive.google.com/drive/folders/")) {
+            // Folder Drive Bypass
+            let folderId = url.split('/folders/')[1].split('?')[0];
+            finalUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
         }
 
         await channelRealtime.send({
@@ -316,7 +334,7 @@
         if (payload.type === 'link') {
             box.style.background = "transparent";
             box.style.padding = "0";
-            box.innerHTML = `<iframe src="${payload.url}"></iframe>`;
+            box.innerHTML = `<iframe src="${payload.url}" allow="autoplay"></iframe>`;
         } 
         else if (ext === 'docx') {
             fetch(payload.url).then(res => res.arrayBuffer()).then(buffer => {
@@ -327,11 +345,10 @@
                 box.innerHTML = `<p style="text-align:center; color:#e74c3c;">Gagal membaca file Word</p>`;
             });
         } 
-        // FIX TOTAL EXCEL: Render tabel HTML murni langsung di browser TV/HP tanpa Google Viewer
         else if (['xlsx', 'xls'].includes(ext)) {
             fetch(payload.url)
                 .then(res => {
-                    if (!res.ok) throw new Error("File tidak ditemukan di storage.");
+                    if (!res.ok) throw new Error("File tidak ditemukan.");
                     return res.arrayBuffer();
                 })
                 .then(buffer => {
@@ -349,21 +366,21 @@
                     }
                 })
                 .catch(err => {
-                    box.innerHTML = `<p style="text-align:center; color:#e74c3c; font-size:18px;">Gagal menampilkan Excel: Berkas dilindungi atau format tidak sesuai.</p>`;
+                    // Jika pembacaan lokal gagal, oper ke Microsoft Office Live Viewer yang stabil
+                    box.style.background = "transparent";
+                    box.style.padding = "0";
+                    box.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}"></iframe>`;
                 });
         } 
-        // FIX TOTAL PPTX & PPT: Menggunakan Jalur Alternatif Office Live Embed (Kompatibel Tizen TV & HP)
         else if (['pptx', 'ppt'].includes(ext)) {
             box.style.background = "transparent";
             box.style.padding = "0";
-            // Menggunakan Office Live Viewer bawaan Microsoft yang lolos sensor security di TV Tizen
             const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}`;
             box.innerHTML = `<iframe src="${officeViewerUrl}"></iframe>`;
         } 
         else if (ext === 'pdf') {
             box.style.background = "transparent";
             box.style.padding = "0";
-            // PDF menggunakan pencucian query agar tidak ditolak enkripsinya oleh browser TV
             const pdfViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(payload.url)}&embedded=true`;
             box.innerHTML = `<iframe src="${pdfViewerUrl}"></iframe>`;
         }
