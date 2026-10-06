@@ -3,12 +3,12 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Tactical Command Task Dashboard</title>
+<title>Tactical Task Monitoring Dashboard</title>
 
-<!-- Font Orbitron & Plus Jakarta Sans & JetBrains Mono -->
+<!-- Font Plus Jakarta Sans & JetBrains Mono -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Plus+Jakarta+Sans:wght@500;700;800;900&display=swap" rel="stylesheet">
 
 <style>
 * {
@@ -16,162 +16,123 @@
   font-family: 'Plus Jakarta Sans', sans-serif;
 }
 
-:root {
-  --neon-green: #00ff9d;
-  --neon-cyan: #00f0ff;
-  --neon-gold: #ffbe0b;
-  --neon-red: #ff0055;
-  --bg-dark: #050a0e;
-  --panel-bg: rgba(10, 20, 26, 0.75);
-  --border-tactical: rgba(0, 255, 157, 0.25);
-}
-
 html, body {
   width: 100%; height: 100%; height: 100vh; height: 100dvh;
-  overflow: hidden; background: var(--bg-dark); color: #e2e8f0;
+  overflow: hidden; background: #05070a; color: #f1f5f9;
 }
 
 body {
   display: flex; flex-direction: column; position: relative;
   background-image: 
-    linear-gradient(rgba(0, 255, 157, 0.03) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(0, 255, 157, 0.03) 1px, transparent 1px),
-    radial-gradient(circle at 50% 20%, rgba(0, 240, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at 80% 80%, rgba(0, 255, 157, 0.05) 0%, transparent 50%);
-  background-size: 30px 30px, 30px 30px, 100% 100%, 100% 100%;
+    radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.08) 0%, transparent 50%),
+    radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
 }
 
-/* HEADER TACTICAL EDIT */
+/* HEADER TACTICAL */
 header {
-  background: rgba(6, 14, 19, 0.9);
-  backdrop-filter: blur(16px);
-  padding: 12px 36px; display: flex;
+  background: rgba(13, 17, 23, 0.85);
+  backdrop-filter: blur(12px);
+  padding: 16px 32px; display: flex;
   justify-content: space-between; align-items: center;
-  border-bottom: 2px solid var(--border-tactical);
-  box-shadow: 0 4px 35px rgba(0, 0, 0, 0.9), 0 1px 15px rgba(0, 255, 157, 0.15);
+  border-bottom: 1px solid rgba(245, 158, 11, 0.3);
+  box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   z-index: 10; flex-shrink: 0;
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 20px) 100%, 0 100%);
-}
-
-.header-left-group {
-  display: flex;
-  align-items: center;
-  gap: 20px;
 }
 
 .logo-title h1 {
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.5rem; font-weight: 900; letter-spacing: 2px;
-  color: var(--neon-green);
+  font-size: 1.8rem; font-weight: 900; letter-spacing: 1.5px;
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
   text-transform: uppercase;
-  text-shadow: 0 0 12px rgba(0, 255, 157, 0.6), 0 0 25px rgba(0, 255, 157, 0.3);
-  display: flex; align-items: center; gap: 10px;
-}
-
-.logo-title h1::before {
-  content: "◈";
-  color: var(--neon-cyan);
-  text-shadow: 0 0 10px var(--neon-cyan);
+  text-shadow: 0 0 20px rgba(245, 158, 11, 0.2);
 }
 
 .logo-title p { 
-  color: #64748b; font-size: 0.75rem; margin-top: 2px; font-weight: 700; 
-  letter-spacing: 2px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
+  color: #64748b; font-size: 0.85rem; margin-top: 2px; font-weight: 700; 
+  letter-spacing: 1px; text-transform: uppercase;
 }
 
 .datetime-container {
-  text-align: center; background: rgba(10, 25, 34, 0.8); padding: 6px 18px;
-  border-radius: 6px; border: 1px solid var(--border-tactical); 
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  box-shadow: inset 0 0 15px rgba(0, 255, 157, 0.05), 0 0 10px rgba(0, 0, 0, 0.5);
+  text-align: right; background: rgba(22, 27, 34, 0.8); padding: 8px 20px;
+  border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.08); 
+  display: flex; align-items: center; gap: 18px;
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5);
 }
 
 #clock {
-  font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 800;
-  color: var(--neon-cyan); line-height: 1; text-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
+  font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800;
+  color: #f59e0b; line-height: 1; text-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
 }
 
-#date { font-size: 0.7rem; color: #94a3b8; margin-top: 3px; font-weight: 700; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
+#date { font-size: 0.85rem; color: #94a3b8; margin-top: 3px; font-weight: 700; letter-spacing: 0.5px; }
 
 .btn-setting {
-  background: rgba(0, 255, 157, 0.1);
-  color: var(--neon-green); border: 1px solid var(--neon-green); padding: 12px 24px;
-  border-radius: 4px; cursor: pointer; font-weight: 800; font-size: 0.85rem;
-  letter-spacing: 1.5px; text-transform: uppercase; font-family: 'Orbitron', sans-serif;
+  background: linear-gradient(135deg, #d97706 0%, #b45309 100%);
+  color: #ffffff; border: 1px solid #f59e0b; padding: 12px 22px;
+  border-radius: 8px; cursor: pointer; font-weight: 800; font-size: 0.9rem;
+  letter-spacing: 0.5px; text-transform: uppercase;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
-  clip-path: polygon(8px 0, 100% 0, 100% calc(100% - 8px), calc(100% - 8px) 100%, 0 100%, 0 8px);
+  box-shadow: 0 4px 15px rgba(217, 119, 6, 0.3);
 }
 
 .btn-setting:hover { 
-  background: var(--neon-green); color: #050a0e;
-  box-shadow: 0 0 25px rgba(0, 255, 157, 0.7);
-  transform: translateY(-2px);
+  transform: translateY(-2px); 
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.5); 
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
 }
 
 /* MAIN AREA */
 main { 
-  flex: 1; padding: 24px 36px; display: flex; flex-direction: column; 
+  flex: 1; padding: 24px 32px; display: flex; flex-direction: column; 
   z-index: 1; overflow: hidden; height: calc(100% - 90px);
 }
 
 .table-container {
-  width: 100%; height: 100%; background: var(--panel-bg);
-  border-radius: 8px; overflow-y: auto; 
-  border: 1px solid var(--border-tactical);
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8), inset 0 0 20px rgba(0, 255, 157, 0.03);
-  backdrop-filter: blur(12px);
+  width: 100%; height: 100%; background: rgba(13, 17, 23, 0.7);
+  border-radius: 14px; overflow-y: auto; 
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
 }
 
-.table-container::-webkit-scrollbar { width: 6px; }
-.table-container::-webkit-scrollbar-track { background: rgba(5, 10, 14, 0.8); }
-.table-container::-webkit-scrollbar-thumb { background: rgba(0, 255, 157, 0.3); border-radius: 3px; }
-.table-container::-webkit-scrollbar-thumb:hover { background: var(--neon-green); }
+.table-container::-webkit-scrollbar { width: 8px; }
+.table-container::-webkit-scrollbar-track { background: rgba(13, 17, 23, 0.5); }
+.table-container::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
+.table-container::-webkit-scrollbar-thumb:hover { background: #374151; }
 
 table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
 
 th {
   position: sticky; top: 0; z-index: 5; 
-  background: #081219; color: var(--neon-cyan);
-  font-family: 'Orbitron', sans-serif;
-  font-size: 0.75rem; font-weight: 800; padding: 18px 12px; 
-  letter-spacing: 2px; text-transform: uppercase;
-  border-bottom: 2px solid var(--neon-cyan); text-align: center;
-  text-shadow: 0 0 8px rgba(0, 240, 255, 0.4);
+  background: #0d1117; color: #94a3b8;
+  font-size: 0.8rem; font-weight: 800; padding: 18px 10px; 
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border-bottom: 2px solid rgba(245, 158, 11, 0.4); text-align: center;
 }
 
 td {
-  padding: 16px 12px; font-size: 0.92rem; color: #cbd5e1;
-  border-bottom: 1px solid rgba(0, 255, 157, 0.08); 
+  padding: 16px 10px; font-size: 0.95rem; color: #e2e8f0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04); 
   vertical-align: middle; text-align: center;
-  transition: all 0.2s;
+  transition: background 0.2s;
 }
 
-tr:nth-child(even) { background-color: rgba(0, 255, 157, 0.015); }
-tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
+tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.01); }
+tr:hover td { background: rgba(245, 158, 11, 0.03); }
 
 .col-no { width: 4%; font-weight: 800; color: #475569; font-family: 'JetBrains Mono', monospace; }
-.col-tgl { width: 8%; font-weight: 700; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
-.col-jam { width: 8%; font-weight: 700; color: var(--neon-gold); font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 8px rgba(255, 190, 11, 0.3); }
-
-/* TEKS TUGAS CENTER */
-.col-tugas { 
-  width: 23%; 
-  font-weight: 800; 
-  color: #ffffff; 
-  text-align: center; 
-  letter-spacing: 0.3px; 
-}
-
+.col-tgl { width: 8%; font-weight: 700; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
+.col-jam { width: 8%; font-weight: 700; color: #f59e0b; font-family: 'JetBrains Mono', monospace; }
+.col-tugas { width: 23%; font-weight: 800; color: #ffffff; text-align: left; letter-spacing: 0.3px; }
 .col-penting { width: 8%; }
-.col-jenis { width: 10%; font-size: 0.8rem; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; }
+.col-jenis { width: 10%; font-size: 0.85rem; letter-spacing: 0.5px; }
 .col-st-akan { width: 9%; }
 .col-st-sedang { width: 9%; }
 .col-st-selesai { width: 9%; }
-.col-ket { width: 13%; text-align: left; color: #94a3b8; font-weight: 600; font-size: 0.88rem; }
+.col-ket { width: 13%; text-align: left; color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
 .col-action { width: 5%; }
 
-/* CHECKBOX STYLES */
+/* CUSTOM CHECKBOX */
 .chk-container {
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; user-select: none;
@@ -180,152 +141,146 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 .chk-container input { display: none; }
 
 .checkmark {
-  width: 22px; height: 22px; border-radius: 3px;
-  border: 1.5px solid #1e293b; background: #060e13;
+  width: 24px; height: 24px; border-radius: 6px;
+  border: 2px solid #334155; background: #090d16;
   display: flex; align-items: center; justify-content: center;
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.chk-container:hover .checkmark { border-color: var(--neon-cyan); box-shadow: 0 0 8px rgba(0, 240, 255, 0.4); }
+.chk-container:hover .checkmark { border-color: #64748b; }
 
 .checkmark:after {
-  content: ""; display: none; width: 5px; height: 9px;
-  border: solid #050a0e; border-width: 0 2.5px 2.5px 0;
+  content: ""; display: none; width: 5px; height: 10px;
+  border: solid white; border-width: 0 2.5px 2.5px 0;
   transform: rotate(45deg); margin-bottom: 2px;
 }
 
 .chk-container input:checked + .checkmark:after { display: block; }
 
 .chk-penting input:checked + .checkmark { 
-  background: var(--neon-red); border-color: #ff3377; 
-  box-shadow: 0 0 15px var(--neon-red); 
+  background: #dc2626; border-color: #ef4444; 
+  box-shadow: 0 0 12px rgba(220, 38, 38, 0.7); 
 }
 
 .chk-akan input:checked + .checkmark { 
-  background: var(--neon-gold); border-color: #ffcc00; 
-  box-shadow: 0 0 15px var(--neon-gold); 
+  background: #d97706; border-color: #f59e0b; 
+  box-shadow: 0 0 12px rgba(217, 119, 6, 0.7); 
 }
 
 .chk-sedang input:checked + .checkmark { 
-  background: var(--neon-cyan); border-color: #33f3ff; 
-  box-shadow: 0 0 18px var(--neon-cyan); 
-  animation: pulse-glow-cyan 1.8s infinite; 
+  background: #2563eb; border-color: #3b82f6; 
+  box-shadow: 0 0 15px rgba(37, 99, 235, 0.8); 
+  animation: pulse-glow-blue 2s infinite; 
 }
 
 .chk-selesai input:checked + .checkmark { 
-  background: var(--neon-green); border-color: #33ffad; 
-  box-shadow: 0 0 15px var(--neon-green); 
+  background: #059669; border-color: #10b981; 
+  box-shadow: 0 0 12px rgba(16, 185, 129, 0.7); 
 }
 
-@keyframes pulse-glow-cyan {
-  0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.4); }
-  50% { box-shadow: 0 0 20px rgba(0, 240, 255, 0.9); }
-  100% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.4); }
+@keyframes pulse-glow-blue {
+  0% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.4); }
+  50% { box-shadow: 0 0 18px rgba(59, 130, 246, 0.9); }
+  100% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.4); }
 }
 
 .btn-action-group { display: flex; gap: 6px; justify-content: center; }
 .btn-icon {
-  background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-tactical); border-radius: 4px;
+  background: #161b22; border: 1px solid #30363d; border-radius: 6px;
   width: 30px; height: 30px; display: flex; justify-content: center; align-items: center;
   cursor: pointer; color: #94a3b8; fill: currentColor; transition: all 0.2s;
 }
 .btn-icon svg { width: 14px; height: 14px; }
-.btn-edit:hover { background: var(--neon-gold); color: #050a0e; border-color: var(--neon-gold); box-shadow: 0 0 10px var(--neon-gold); }
-.btn-delete:hover { background: var(--neon-red); color: #fff; border-color: var(--neon-red); box-shadow: 0 0 10px var(--neon-red); }
-.btn-save { background: var(--neon-green); color: #050a0e; border-color: var(--neon-green); box-shadow: 0 0 10px var(--neon-green); }
+.btn-edit:hover { background: #d97706; color: #fff; border-color: #f59e0b; }
+.btn-delete:hover { background: #dc2626; color: #fff; border-color: #ef4444; }
+.btn-save { background: #059669; color: #fff; border-color: #10b981; }
 
 .edit-input, .edit-select, .edit-date {
-  background: #060e13; border: 1px solid var(--neon-cyan); color: #f8fafc;
-  padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; width: 100%; font-weight: 700; text-align: center;
-  color-scheme: dark;
+  background: #090d16; border: 1px solid #f59e0b; color: #f8fafc;
+  padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; width: 100%; font-weight: 700;
 }
 
-/* MODAL STYLING */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
-  background: rgba(4, 8, 12, 0.9); backdrop-filter: blur(14px); 
+  background: rgba(5, 7, 10, 0.85); backdrop-filter: blur(10px); 
   display: flex; justify-content: center; align-items: center;
   z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s;
 }
 .modal-overlay.active { opacity: 1; pointer-events: auto; }
 
 .modal-content {
-  background: #081219; width: 90%; max-width: 500px; border-radius: 6px;
-  border: 1.5px solid var(--neon-green); padding: 30px; 
+  background: #0d1117; width: 90%; max-width: 500px; border-radius: 14px;
+  border: 1px solid rgba(245, 158, 11, 0.4); padding: 28px; 
   display: flex; flex-direction: column;
-  box-shadow: 0 0 40px rgba(0, 255, 157, 0.25), inset 0 0 15px rgba(0, 255, 157, 0.05);
-  clip-path: polygon(0 0, 100% 0, 100% calc(100% - 15px), calc(100% - 15px) 100%, 0 100%);
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.9), 0 0 30px rgba(245, 158, 11, 0.1);
 }
 
 .modal-header { 
   display: flex; justify-content: space-between; align-items: center; 
-  margin-bottom: 22px; border-bottom: 1px solid var(--border-tactical); 
+  margin-bottom: 20px; border-bottom: 1px solid rgba(255, 255, 255, 0.08); 
   padding-bottom: 12px; 
 }
 .modal-header h2 { 
-  font-family: 'Orbitron', sans-serif;
-  font-size: 1.1rem; color: var(--neon-green); font-weight: 800; 
-  letter-spacing: 1.5px; text-transform: uppercase;
-  text-shadow: 0 0 10px rgba(0, 255, 157, 0.5);
+  font-size: 1.2rem; color: #f59e0b; font-weight: 800; 
+  letter-spacing: 1px; text-transform: uppercase;
 }
 .btn-close { background: none; border: none; color: #64748b; font-size: 1.4rem; cursor: pointer; }
-.btn-close:hover { color: var(--neon-red); }
+.btn-close:hover { color: #f8fafc; }
 
-.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; text-align: left; }
-.form-group label { font-size: 0.72rem; color: var(--neon-cyan); font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; font-family: 'Orbitron', sans-serif; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-group { display: flex; flex-direction: column; gap: 6px; margin-bottom: 14px; text-align: left; }
+.form-group label { font-size: 0.75rem; color: #94a3b8; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 .form-group input, .form-group select {
-  background: #050a0e; border: 1px solid var(--border-tactical); color: #f8fafc;
-  padding: 12px 14px; border-radius: 4px; font-size: 0.9rem; width: 100%; font-weight: 700;
-  transition: all 0.2s; color-scheme: dark;
+  background: #161b22; border: 1px solid #30363d; color: #f8fafc;
+  padding: 10px 14px; border-radius: 8px; font-size: 0.9rem; width: 100%; font-weight: 700;
+  transition: border-color 0.2s;
 }
 .form-group input:focus, .form-group select:focus {
-  outline: none; border-color: var(--neon-green); box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
+  outline: none; border-color: #f59e0b;
 }
 
 .btn-add {
-  background: transparent;
-  color: var(--neon-green); border: 1.5px solid var(--neon-green); padding: 14px; border-radius: 4px;
-  font-weight: 800; cursor: pointer; font-size: 0.9rem; margin-top: 10px;
-  letter-spacing: 1.5px; text-transform: uppercase; font-family: 'Orbitron', sans-serif;
-  transition: all 0.2s; box-shadow: 0 0 15px rgba(0, 255, 157, 0.2);
+  background: linear-gradient(135deg, #059669 0%, #047857 100%);
+  color: white; border: 1px solid #10b981; padding: 14px; border-radius: 8px;
+  font-weight: 800; cursor: pointer; font-size: 0.95rem; margin-top: 10px;
+  letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 .btn-add:hover { 
-  background: var(--neon-green); color: #050a0e;
-  box-shadow: 0 0 25px rgba(0, 255, 157, 0.7); 
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); 
 }
 
 #tizenAudioUnlocker {
   position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: #050a0e; z-index: 99999; display: flex; flex-direction: column;
+  background: #05070a; z-index: 99999; display: flex; flex-direction: column;
   justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;
-  background-image: radial-gradient(circle at 50% 50%, rgba(0, 255, 157, 0.1) 0%, transparent 70%);
 }
 </style>
 </head>
 <body>
 
 <div id="tizenAudioUnlocker">
-  <h1 style="font-family: 'Orbitron', sans-serif; font-size: 2.2rem; margin-bottom: 12px; color: var(--neon-green); font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 255, 157, 0.6);">TACTICAL COMMAND SYSTEM</h1>
-  <p style="font-size: 0.95rem; margin-bottom: 35px; color: #64748b; max-width: 480px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">INITIALIZING OPERATIONAL TACTICAL INTERFACE...</p>
-  <button onclick="bukaKunciAudio()" style="font-family: 'Orbitron', sans-serif; padding: 18px 40px; font-size: 1rem; font-weight: 800; letter-spacing: 2px; background: transparent; color: var(--neon-green); border: 2px solid var(--neon-green); border-radius: 4px; cursor: pointer; box-shadow: 0 0 30px rgba(0, 255, 157, 0.4); transition: all 0.3s;">
-    ⚡ INITIALIZE SYSTEM
+  <h1 style="font-size: 2rem; margin-bottom: 12px; color: #f59e0b; font-weight: 900; letter-spacing: 2px;">TACTICAL MONITORING DASHBOARD</h1>
+  <p style="font-size: 1rem; margin-bottom: 30px; color: #64748b; max-width: 480px; font-weight: 700;">Klik tombol di bawah untuk mengaktifkan antarmuka audio & konsol sistem.</p>
+  <button onclick="bukaKunciAudio()" style="padding: 16px 36px; font-size: 1rem; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: 1px solid #f59e0b; border-radius: 8px; cursor: pointer; box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);">
+    ⚡ AKTIFKAN SISTEM
   </button>
 </div>
 
 <header>
-  <div class="header-left-group">
-    <div class="datetime-container">
-      <div id="clock">00:00</div>
-      <div id="date">MEMUAT...</div>
-    </div>
-    <div class="logo-title">
-      <h1>MONITORING STATUS TUGAS</h1>
-      <p>SYSTEM OPERATIONAL DISPATCH & LOGISTICS</p>
-    </div>
+  <div class="logo-title">
+    <h1>MONITORING STATUS TUGAS</h1>
+    <p>Sistem Pemantauan Operasional Real-Time</p>
   </div>
-  <button class="btn-setting" onclick="toggleModal(true)">＋ TAMBAH TUGAS</button>
+  <div class="datetime-container">
+    <div>
+      <div id="clock">00:00</div>
+      <div id="date">Memuat Tanggal...</div>
+    </div>
+    <button class="btn-setting" onclick="toggleModal(true)">＋ Tambah Tugas</button>
+  </div>
 </header>
 
 <main>
@@ -347,7 +302,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
         </tr>
       </thead>
       <tbody id="main-table-body">
-        <tr><td colspan="11" style="text-align: center; color: var(--neon-cyan); font-weight: 700; padding: 40px; font-family: 'JetBrains Mono', monospace;">CONNECTING TO TACTICAL SERVER...</td></tr>
+        <tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: 700; padding: 40px;">Memuat Data...</td></tr>
       </tbody>
     </table>
   </div>
@@ -356,7 +311,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 <div class="modal-overlay" id="settingModal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>＋ TAMBAH TUGAS BARU</h2>
+      <h2>＋ Tambah Tugas Baru</h2>
       <button class="btn-close" onclick="toggleModal(false)">✕</button>
     </div>
 
@@ -373,7 +328,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 
     <div class="form-group">
       <label for="inputTugas">Rincian Tugas:</label>
-      <input type="text" id="inputTugas" placeholder="Deskripsi tugas operasional">
+      <input type="text" id="inputTugas" placeholder="Masukkan deskripsi tugas">
     </div>
 
     <div class="form-row">
@@ -381,7 +336,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
         <label for="inputPenting">Prioritas:</label>
         <select id="inputPenting">
           <option value="tidak">Biasa</option>
-          <option value="ya">Penting / Urgent</option>
+          <option value="ya">Penting</option>
         </select>
       </div>
       <div class="form-group">
@@ -395,10 +350,10 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 
     <div class="form-group">
       <label for="inputKeterangan">Keterangan Tambahan:</label>
-      <input type="text" id="inputKeterangan" placeholder="Penanggung Jawab / Posko / Lokasi">
+      <input type="text" id="inputKeterangan" placeholder="Penanggung Jawab / Lokasi">
     </div>
 
-    <button class="btn-add" onclick="addNewTask()">✔ SIMPAN TASK</button>
+    <button class="btn-add" onclick="addNewTask()">✔ Simpan Data</button>
   </div>
 </div>
 
@@ -485,63 +440,43 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
+// SIMPAN KE BROWSER LOCAL STORAGE DAN CLOUD
 async function saveData() {
   isSaving = true;
   localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
-
   try {
-    const response = await fetch(dbURL, {
+    await fetch(dbURL, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(systemTasks),
-      signal: controller.signal
+      body: JSON.stringify(systemTasks)
     });
-    clearTimeout(timeoutId);
-    if (response.ok) {
-      console.log("Berhasil tersinkron ke cloud!");
-    }
   } catch (e) {
-    console.warn("Koneksi cloud timeout, data tersimpan aman di lokal:", e);
+    console.error("Gagal sinkronisasi ke cloud:", e);
   } finally {
     isSaving = false;
   }
 }
 
+// AMBIL DATA REAL-TIME DENGAN CACHE-BUSTING
 async function loadData() {
-  // Cegah auto-reload jika sedang mengedit baris atau sedang proses simpan
   if (editingRowIndex !== -1 || isSaving) return;
 
-  const localData = localStorage.getItem('korpasgat_tasks_data');
-  if (localData) {
-    try {
-      const parsedLocal = JSON.parse(localData);
-      if (Array.isArray(parsedLocal) && parsedLocal.length > 0) {
-        systemTasks = parsedLocal;
-        renderTasks(false);
-      }
-    } catch (e) { console.error("Gagal parse localData", e); }
-  }
-
-  const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 3000);
-
   try {
-    const response = await fetch(dbURL + '?_=' + new Date().getTime(), { signal: controller.signal });
-    clearTimeout(timeoutId);
+    // Tambahkan timestamp (?_=Date.now()) untuk mencegah caching browser TV
+    const response = await fetch(dbURL + '?_=' + Date.now());
     if (response.ok) {
       const cloudData = await response.json();
-      if (Array.isArray(cloudData) && editingRowIndex === -1) {
-        systemTasks = cloudData;
-        localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
-        renderTasks(false);
+      if (Array.isArray(cloudData)) {
+        // Cek jika data berbeda dari yang disimpan saat ini
+        if (JSON.stringify(cloudData) !== JSON.stringify(systemTasks)) {
+          systemTasks = cloudData;
+          localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
+          renderTasks(false);
+        }
       }
     }
   } catch (e) {
-    console.warn("Gagal terhubung ke cloud server, menggunakan lokal data.");
-    if (systemTasks.length === 0 && editingRowIndex === -1) renderTasks(false);
+    console.error("Koneksi cloud terganggu:", e);
   }
 }
 
@@ -553,15 +488,12 @@ function formatTanggalSimple(dateStr) {
 }
 
 function renderTasks(triggerSave = true) {
-  // Hentikan render ulang jika sedang mengedit dan bukan pemicu manual
-  if (editingRowIndex !== -1 && !triggerSave) return;
-
   const tbody = document.getElementById('main-table-body');
   if (!tbody) return;
   tbody.innerHTML = '';
 
   if (systemTasks.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: bold; padding: 40px; font-family: \'JetBrains Mono\', monospace;">SYSTEM READY. DATABASE KOSONG. KLIK + TAMBAH TUGAS.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: bold; padding: 40px;">Database Kosong. Klik + Tambah Tugas untuk membuat entry baru.</td></tr>';
     if (triggerSave) saveData();
     return;
   }
@@ -577,7 +509,7 @@ function renderTasks(triggerSave = true) {
     if (editingRowIndex === index) {
       tr.innerHTML = 
         '<td class="col-no">' + (index + 1) + '</td>' +
-        '<td class="col-tgl"><input type="date" class="edit-date" id="edit-tgl" value="' + (item.tgl || '') + '"></td>' +
+        '<td class="col-tgl"><input type="date" class="edit-date" id="edit-tgl" value="' + item.tgl + '"></td>' +
         '<td class="col-jam"><input type="time" class="edit-input" id="edit-jam" value="' + (item.jam || '08:00') + '"></td>' +
         '<td class="col-tugas"><input type="text" class="edit-input" id="edit-tugas" value="' + item.tugas + '"></td>' +
         '<td class="col-penting">' +
@@ -586,7 +518,7 @@ function renderTasks(triggerSave = true) {
         '<td class="col-jenis">' +
           '<select id="edit-jenis" class="edit-select"><option value="Rutin" ' + (item.jenis === 'Rutin' ? 'selected' : '') + '>Rutin</option><option value="Tambahan" ' + (item.jenis === 'Tambahan' ? 'selected' : '') + '>Tambahan</option></select>' +
         '</td>' +
-        '<td colspan="3"><span style="color:var(--neon-cyan); font-weight:bold; font-size:0.8rem; font-family:\'Orbitron\', sans-serif;">EDITING...</span></td>' +
+        '<td colspan="3"><span style="color:#f59e0b; font-weight:bold; font-size:0.85rem;">MENGEDIT...</span></td>' +
         '<td class="col-ket"><input type="text" class="edit-input" id="edit-keterangan" value="' + (item.keterangan || '') + '"></td>' +
         '<td class="col-action">' +
           '<div class="btn-action-group">' +
@@ -609,7 +541,7 @@ function renderTasks(triggerSave = true) {
           '</label>' +
         '</td>' +
         
-        '<td class="col-jenis" style="font-weight:800; color:' + (item.jenis === 'Rutin' ? 'var(--neon-cyan)' : 'var(--neon-gold)') + ';">' + item.jenis.toUpperCase() + '</td>' +
+        '<td class="col-jenis" style="font-weight:800; color:' + (item.jenis === 'Rutin' ? '#38bdf8' : '#fbbf24') + ';">' + item.jenis.toUpperCase() + '</td>' +
         
         '<td class="col-st-akan">' +
           '<label class="chk-container chk-akan">' +
@@ -731,8 +663,19 @@ document.getElementById('inputTgl').valueAsDate = new Date();
 
 setInterval(updateDateTime, 1000);
 updateDateTime();
+
+// Muat data awal dari Local Storage agar tampilan instan
+const localData = localStorage.getItem('korpasgat_tasks_data');
+if (localData) {
+  try {
+    systemTasks = JSON.parse(localData);
+    renderTasks(false);
+  } catch (e) { console.error("Gagal parse localData", e); }
+}
+
+// Panggil sinkronisasi cloud langsung & atur interval setiap 3 detik
 loadData();
-setInterval(loadData, 10000);
+setInterval(loadData, 3000);
 </script>
 </body>
 </html>
