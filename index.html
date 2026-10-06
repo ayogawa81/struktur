@@ -367,9 +367,7 @@ let isSaving = false;
 let systemSchedules = [];
 let currentHours = "00";
 let currentMinutes = "00";
-let editingRowIndex = -1;
 let spokenSchedules = new Set();
-let audioCtx = null;
 
 const iconPencil = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
 const iconTrash = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
@@ -462,7 +460,6 @@ async function saveData() {
   } catch (e) {
     console.error("Gagal sinkronisasi ke cloud:", e);
   } finally {
-    // Memberi jeda sebentar agar server npoint selesai memproses data baru
     setTimeout(() => { isSaving = false; }, 1500);
   }
 }
@@ -472,7 +469,6 @@ async function loadData() {
   if (editingRowIndex !== -1 || isSaving) return;
 
   try {
-    // Timestamp + cache: 'no-store' dipasang agar TV Tizen tidak mengambil cache lama
     const response = await fetch(dbURL + '?t=' + Date.now(), {
       method: 'GET',
       headers: {
@@ -485,7 +481,6 @@ async function loadData() {
     if (response.ok) {
       const cloudData = await response.json();
       if (Array.isArray(cloudData)) {
-        // Cek jika data cloud berbeda dari data lokal saat ini
         if (JSON.stringify(cloudData) !== JSON.stringify(systemTasks)) {
           systemTasks = cloudData;
           localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
@@ -682,7 +677,6 @@ document.getElementById('inputTgl').valueAsDate = new Date();
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// Muat data awal dari Local Storage agar tampilan instan
 const localData = localStorage.getItem('korpasgat_tasks_data');
 if (localData) {
   try {
@@ -691,7 +685,6 @@ if (localData) {
   } catch (e) { console.error("Gagal parse localData", e); }
 }
 
-// Panggil sinkronisasi cloud langsung & set polling ideal 5 detik
 loadData();
 setInterval(loadData, 5000);
 </script>
