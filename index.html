@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Tactical Command Task Dashboard</title>
 
-<!-- Font Orbitron (Militer Taktis/Neon) & Plus Jakarta Sans & JetBrains Mono -->
+<!-- Font Orbitron & Plus Jakarta Sans & JetBrains Mono -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Orbitron:wght@600;800;900&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
@@ -31,7 +31,6 @@ html, body {
   overflow: hidden; background: var(--bg-dark); color: #e2e8f0;
 }
 
-/* BACKGROUND TACTICAL HUD GRID & RADAR */
 body {
   display: flex; flex-direction: column; position: relative;
   background-image: 
@@ -42,11 +41,11 @@ body {
   background-size: 30px 30px, 30px 30px, 100% 100%, 100% 100%;
 }
 
-/* HEADER TACTICAL */
+/* HEADER TACTICAL EDIT */
 header {
   background: rgba(6, 14, 19, 0.9);
   backdrop-filter: blur(16px);
-  padding: 16px 36px; display: flex;
+  padding: 12px 36px; display: flex;
   justify-content: space-between; align-items: center;
   border-bottom: 2px solid var(--border-tactical);
   box-shadow: 0 4px 35px rgba(0, 0, 0, 0.9), 0 1px 15px rgba(0, 255, 157, 0.15);
@@ -54,9 +53,15 @@ header {
   clip-path: polygon(0 0, 100% 0, 100% calc(100% - 10px), calc(100% - 20px) 100%, 0 100%);
 }
 
+.header-left-group {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
 .logo-title h1 {
   font-family: 'Orbitron', sans-serif;
-  font-size: 1.7rem; font-weight: 900; letter-spacing: 2.5px;
+  font-size: 1.5rem; font-weight: 900; letter-spacing: 2px;
   color: var(--neon-green);
   text-transform: uppercase;
   text-shadow: 0 0 12px rgba(0, 255, 157, 0.6), 0 0 25px rgba(0, 255, 157, 0.3);
@@ -70,23 +75,23 @@ header {
 }
 
 .logo-title p { 
-  color: #64748b; font-size: 0.8rem; margin-top: 3px; font-weight: 700; 
+  color: #64748b; font-size: 0.75rem; margin-top: 2px; font-weight: 700; 
   letter-spacing: 2px; text-transform: uppercase; font-family: 'JetBrains Mono', monospace;
 }
 
 .datetime-container {
-  text-align: right; background: rgba(10, 25, 34, 0.8); padding: 8px 22px;
+  text-align: center; background: rgba(10, 25, 34, 0.8); padding: 6px 18px;
   border-radius: 6px; border: 1px solid var(--border-tactical); 
-  display: flex; align-items: center; gap: 20px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
   box-shadow: inset 0 0 15px rgba(0, 255, 157, 0.05), 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 #clock {
-  font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800;
+  font-family: 'JetBrains Mono', monospace; font-size: 1.6rem; font-weight: 800;
   color: var(--neon-cyan); line-height: 1; text-shadow: 0 0 14px rgba(0, 240, 255, 0.6);
 }
 
-#date { font-size: 0.8rem; color: #94a3b8; margin-top: 4px; font-weight: 700; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
+#date { font-size: 0.7rem; color: #94a3b8; margin-top: 3px; font-weight: 700; letter-spacing: 1px; font-family: 'JetBrains Mono', monospace; }
 
 .btn-setting {
   background: rgba(0, 255, 157, 0.1);
@@ -148,7 +153,16 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 .col-no { width: 4%; font-weight: 800; color: #475569; font-family: 'JetBrains Mono', monospace; }
 .col-tgl { width: 8%; font-weight: 700; color: #94a3b8; font-family: 'JetBrains Mono', monospace; }
 .col-jam { width: 8%; font-weight: 700; color: var(--neon-gold); font-family: 'JetBrains Mono', monospace; text-shadow: 0 0 8px rgba(255, 190, 11, 0.3); }
-.col-tugas { width: 23%; font-weight: 800; color: #ffffff; text-align: left; letter-spacing: 0.3px; }
+
+/* TEKS TUGAS CENTER */
+.col-tugas { 
+  width: 23%; 
+  font-weight: 800; 
+  color: #ffffff; 
+  text-align: center; 
+  letter-spacing: 0.3px; 
+}
+
 .col-penting { width: 8%; }
 .col-jenis { width: 10%; font-size: 0.8rem; letter-spacing: 1px; font-family: 'Orbitron', sans-serif; }
 .col-st-akan { width: 9%; }
@@ -157,7 +171,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 .col-ket { width: 13%; text-align: left; color: #94a3b8; font-weight: 600; font-size: 0.88rem; }
 .col-action { width: 5%; }
 
-/* NEON TACTICAL CHECKBOX */
+/* CHECKBOX STYLES */
 .chk-container {
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; user-select: none;
@@ -222,7 +236,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 
 .edit-input, .edit-select, .edit-date {
   background: #060e13; border: 1px solid var(--neon-cyan); color: #f8fafc;
-  padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; width: 100%; font-weight: 700;
+  padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; width: 100%; font-weight: 700; text-align: center;
 }
 
 /* MODAL STYLING */
@@ -294,23 +308,23 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 <div id="tizenAudioUnlocker">
   <h1 style="font-family: 'Orbitron', sans-serif; font-size: 2.2rem; margin-bottom: 12px; color: var(--neon-green); font-weight: 900; letter-spacing: 3px; text-shadow: 0 0 20px rgba(0, 255, 157, 0.6);">TACTICAL COMMAND SYSTEM</h1>
   <p style="font-size: 0.95rem; margin-bottom: 35px; color: #64748b; max-width: 480px; font-weight: 700; font-family: 'JetBrains Mono', monospace;">INITIALIZING OPERATIONAL TACTICAL INTERFACE...</p>
-  <button onclick="bukaKunciAudio()" style="font-family: 'Orbitron', sans-serif; padding: 18px 40px; font-size: 1rem; font-weight: 800; letter-spacing: 2px; background: transparent; color: var(--neon-green); border: 2px solid var(--neon-green); border-radius: 4px; cursor: pointer; box-shadow: 0 0 30px rgba(0, 255, 157, 0.4); transition: all 0.3s;" onhover="this.style.background='var(--neon-green)';">
+  <button onclick="bukaKunciAudio()" style="font-family: 'Orbitron', sans-serif; padding: 18px 40px; font-size: 1rem; font-weight: 800; letter-spacing: 2px; background: transparent; color: var(--neon-green); border: 2px solid var(--neon-green); border-radius: 4px; cursor: pointer; box-shadow: 0 0 30px rgba(0, 255, 157, 0.4); transition: all 0.3s;">
     ⚡ INITIALIZE SYSTEM
   </button>
 </div>
 
 <header>
-  <div class="logo-title">
-    <h1>MONITORING STATUS TUGAS</h1>
-    <p>SYSTEM OPERATIONAL DISPATCH & LOGISTICS</p>
-  </div>
-  <div class="datetime-container">
-    <div>
+  <div class="header-left-group">
+    <div class="datetime-container">
       <div id="clock">00:00</div>
       <div id="date">MEMUAT...</div>
     </div>
-    <button class="btn-setting" onclick="toggleModal(true)">＋ TAMBAH TUGAS</button>
+    <div class="logo-title">
+      <h1>MONITORING STATUS TUGAS</h1>
+      <p>SYSTEM OPERATIONAL DISPATCH & LOGISTICS</p>
+    </div>
   </div>
+  <button class="btn-setting" onclick="toggleModal(true)">＋ TAMBAH TUGAS</button>
 </header>
 
 <main>
@@ -470,7 +484,6 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// SIMPAN DATA DENGAN TIMEOUT FALLBACK
 async function saveData() {
   isSaving = true;
   localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
@@ -496,7 +509,6 @@ async function saveData() {
   }
 }
 
-// AMBIL DATA
 async function loadData() {
   if (editingRowIndex !== -1 || isSaving) return;
 
