@@ -28,12 +28,12 @@ body {
     radial-gradient(circle at 100% 100%, rgba(16, 185, 129, 0.05) 0%, transparent 40%);
 }
 
-/* HEADER SANGAR & ELEGAN */
+/* HEADER TACTICAL */
 header {
   background: rgba(13, 17, 23, 0.85);
   backdrop-filter: blur(12px);
   padding: 16px 32px; display: flex;
-  justify-content: space-between; align-align: center;
+  justify-content: space-between; align-items: center;
   border-bottom: 1px solid rgba(245, 158, 11, 0.3);
   box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8), inset 0 -1px 0 rgba(255, 255, 255, 0.05);
   z-index: 10; flex-shrink: 0;
@@ -95,7 +95,6 @@ main {
   backdrop-filter: blur(10px);
 }
 
-/* Custom Scrollbar */
 .table-container::-webkit-scrollbar { width: 8px; }
 .table-container::-webkit-scrollbar-track { background: rgba(13, 17, 23, 0.5); }
 .table-container::-webkit-scrollbar-thumb { background: #1f2937; border-radius: 4px; }
@@ -121,7 +120,6 @@ td {
 tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.01); }
 tr:hover td { background: rgba(245, 158, 11, 0.03); }
 
-/* Kolom Alignment & Styling */
 .col-no { width: 4%; font-weight: 800; color: #475569; font-family: 'JetBrains Mono', monospace; }
 .col-tgl { width: 8%; font-weight: 700; color: #cbd5e1; font-family: 'JetBrains Mono', monospace; }
 .col-jam { width: 8%; font-weight: 700; color: #f59e0b; font-family: 'JetBrains Mono', monospace; }
@@ -134,7 +132,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
 .col-ket { width: 13%; text-align: left; color: #94a3b8; font-weight: 600; font-size: 0.9rem; }
 .col-action { width: 5%; }
 
-/* CUSTOM CHECKBOX TACTICAL */
+/* CUSTOM CHECKBOX */
 .chk-container {
   display: inline-flex; align-items: center; justify-content: center;
   cursor: pointer; user-select: none;
@@ -159,7 +157,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
 
 .chk-container input:checked + .checkmark:after { display: block; }
 
-/* WARNA CHECKBOX & GLOW EFFECT */
 .chk-penting input:checked + .checkmark { 
   background: #dc2626; border-color: #ef4444; 
   box-shadow: 0 0 12px rgba(220, 38, 38, 0.7); 
@@ -187,7 +184,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
   100% { box-shadow: 0 0 5px rgba(37, 99, 235, 0.4); }
 }
 
-/* TOMBOL AKSI METALLIC */
 .btn-action-group { display: flex; gap: 6px; justify-content: center; }
 .btn-icon {
   background: #161b22; border: 1px solid #30363d; border-radius: 6px;
@@ -204,7 +200,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
   padding: 6px 10px; border-radius: 6px; font-size: 0.85rem; width: 100%; font-weight: 700;
 }
 
-/* MODAL TACTICAL DESIGN */
 .modal-overlay {
   position: fixed; top: 0; left: 0; right: 0; bottom: 0; 
   background: rgba(5, 7, 10, 0.85); backdrop-filter: blur(10px); 
@@ -307,7 +302,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
         </tr>
       </thead>
       <tbody id="main-table-body">
-        <tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: 700; padding: 40px;">Menghubungkan ke Database...</td></tr>
+        <tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: 700; padding: 40px;">Memuat Data...</td></tr>
       </tbody>
     </table>
   </div>
@@ -368,6 +363,7 @@ const dbURL = "https://api.npoint.io/c8f2e46b1d935402179a";
 let systemTasks = [];
 let editingRowIndex = -1;
 let audioCtx = null;
+let isSaving = false;
 
 const iconPencil = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
 const iconTrash = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
@@ -444,30 +440,49 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-async function loadDataFromCloud() {
-  if (editingRowIndex !== -1) return;
+// SIMPAN KE BROWSER LOCAL STORAGE DAN CLOUD
+async function saveData() {
+  isSaving = true;
+  localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
   try {
-    const response = await fetch(dbURL + '?_=' + new Date().getTime());
-    if (!response.ok) throw new Error("Gagal mengambil data");
-    
-    systemTasks = await response.json();
-    if (!Array.isArray(systemTasks)) systemTasks = [];
-    renderTasks(false);
-  } catch (e) {
-    console.error("Koneksi database terganggu:", e);
-  }
-}
-
-async function saveDataToCloud() {
-  try {
-    const res = await fetch(dbURL, {
+    await fetch(dbURL, {
       method: 'POST',
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(systemTasks)
     });
-    if (!res.ok) throw new Error("Gagal menyimpan data");
-  } catch (e) { 
-    console.error("Gagal simpan:", e);
+  } catch (e) {
+    console.error("Gagal sinkronisasi ke cloud:", e);
+  } finally {
+    isSaving = false;
+  }
+}
+
+// AMBIL DATA
+async function loadData() {
+  if (editingRowIndex !== -1 || isSaving) return;
+
+  // Coba muat data lokal terlebih dahulu
+  const localData = localStorage.getItem('korpasgat_tasks_data');
+  if (localData) {
+    try {
+      systemTasks = JSON.parse(localData);
+      renderTasks(false);
+    } catch (e) { console.error("Gagal parse localData", e); }
+  }
+
+  // Tarik data terbaru dari server
+  try {
+    const response = await fetch(dbURL + '?_=' + new Date().getTime());
+    if (response.ok) {
+      const cloudData = await response.json();
+      if (Array.isArray(cloudData) && cloudData.length > 0) {
+        systemTasks = cloudData;
+        localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
+        renderTasks(false);
+      }
+    }
+  } catch (e) {
+    console.error("Koneksi cloud terganggu:", e);
   }
 }
 
@@ -478,14 +493,14 @@ function formatTanggalSimple(dateStr) {
   return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
 }
 
-function renderTasks(shouldSave = true) {
+function renderTasks(triggerSave = true) {
   const tbody = document.getElementById('main-table-body');
   if (!tbody) return;
   tbody.innerHTML = '';
 
   if (systemTasks.length === 0) {
-    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #475569; font-weight: bold; padding: 40px;">Database Kosong. Tambahkan tugas baru.</td></tr>';
-    if (shouldSave) saveDataToCloud();
+    tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: bold; padding: 40px;">Database Kosong. Klik + Tambah Tugas untuk membuat entry baru.</td></tr>';
+    if (triggerSave) saveData();
     return;
   }
 
@@ -567,7 +582,7 @@ function renderTasks(shouldSave = true) {
     tbody.appendChild(tr);
   });
 
-  if (shouldSave) saveDataToCloud();
+  if (triggerSave) saveData();
 }
 
 function changeStatus(index, newStatus) {
@@ -589,7 +604,7 @@ function changeStatus(index, newStatus) {
 
 function togglePenting(index, isChecked) {
   systemTasks[index].isPenting = isChecked;
-  saveDataToCloud();
+  saveData();
 }
 
 function enableInlineEdit(index) {
@@ -654,8 +669,8 @@ document.getElementById('inputTgl').valueAsDate = new Date();
 
 setInterval(updateDateTime, 1000);
 updateDateTime();
-loadDataFromCloud();
-setInterval(loadDataFromCloud, 5000);
+loadData();
+setInterval(loadData, 10000);
 </script>
 </body>
 </html>
