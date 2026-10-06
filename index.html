@@ -440,34 +440,46 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// SIMPAN KE BROWSER LOCAL STORAGE DAN CLOUD
+// SIMPAN KE BROWSER LOCAL STORAGE DAN CLOUD (DENGAN NO-CACHE CONTROL)
 async function saveData() {
   isSaving = true;
   localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
   try {
     await fetch(dbURL, {
       method: 'POST',
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      },
       body: JSON.stringify(systemTasks)
     });
   } catch (e) {
     console.error("Gagal sinkronisasi ke cloud:", e);
   } finally {
-    isSaving = false;
+    // Memberi jeda sebentar agar server npoint selesai memproses data baru
+    setTimeout(() => { isSaving = false; }, 1500);
   }
 }
 
-// AMBIL DATA REAL-TIME DENGAN CACHE-BUSTING
+// AMBIL DATA REAL-TIME DENGAN CACHE-BUSTING & NO-STORE FOR TIZEN TV
 async function loadData() {
   if (editingRowIndex !== -1 || isSaving) return;
 
   try {
-    // Tambahkan timestamp (?_=Date.now()) untuk mencegah caching browser TV
-    const response = await fetch(dbURL + '?_=' + Date.now());
+    // Timestamp + cache: 'no-store' dipasang agar TV Tizen tidak mengambil cache lama
+    const response = await fetch(dbURL + '?t=' + Date.now(), {
+      method: 'GET',
+      headers: {
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache'
+      },
+      cache: 'no-store'
+    });
+
     if (response.ok) {
       const cloudData = await response.json();
       if (Array.isArray(cloudData)) {
-        // Cek jika data berbeda dari yang disimpan saat ini
+        // Cek jika data cloud berbeda dari data lokal saat ini
         if (JSON.stringify(cloudData) !== JSON.stringify(systemTasks)) {
           systemTasks = cloudData;
           localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
@@ -673,9 +685,9 @@ if (localData) {
   } catch (e) { console.error("Gagal parse localData", e); }
 }
 
-// Panggil sinkronisasi cloud langsung & atur interval setiap 3 detik
+// Panggil sinkronisasi cloud langsung & set polling ideal 5 detik
 loadData();
-setInterval(loadData, 3000);
+setInterval(loadData, 5000);
 </script>
 </body>
 </html>
