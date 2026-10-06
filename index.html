@@ -1,445 +1,537 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Universal Real-Time TV Monitor - KORPASGAT</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            background-color: #11141a;
-            color: #ffffff;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        .header {
-            background-color: #1a1f2c;
-            padding: 20px;
-            text-align: center;
-            border-bottom: 3px solid #3498db;
-        }
-        .title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #3498db;
-            margin-bottom: 15px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .control-panel {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            justify-content: center;
-            align-items: center;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-        .btn-source {
-            background-color: #e74c3c;
-            color: white;
-            padding: 12px 24px;
-            font-size: 15px;
-            border-radius: 6px;
-            cursor: pointer;
-            border: none;
-            font-weight: bold;
-            display: inline-block;
-            transition: background 0.2s;
-        }
-        .btn-source:hover { background-color: #c0392b; }
-        
-        .cloud-input-group {
-            display: flex;
-            gap: 5px;
-            width: 100%;
-            max-width: 450px;
-        }
-        .cloud-input {
-            flex: 1;
-            padding: 12px;
-            border: 1px solid #34495e;
-            border-radius: 6px;
-            background-color: #2c3e50;
-            color: white;
-            font-size: 14px;
-        }
-        .btn-cloud {
-            background-color: #2ecc71;
-            color: white;
-            border: none;
-            padding: 0 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: background 0.2s;
-        }
-        .btn-cloud:hover { background-color: #27ae60; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Display Monitoring Status Tugas (New JSON Cloud)</title>
 
-        .btn-fullscreen {
-            background-color: #f39c12;
-            color: white;
-            border: none;
-            padding: 12px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: bold;
-            font-size: 15px;
-            transition: background 0.2s;
-        }
-        .btn-fullscreen:hover { background-color: #d35400; }
+<!-- Font Plus Jakarta Sans -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@700;800&family=Plus+Jakarta+Sans:wght@500;700;800&display=swap" rel="stylesheet">
 
-        /* Gaya Tombol Link Eksternal yang Baru Ditambahkan */
-        .direct-link-container {
-            max-width: 1200px;
-            width: 100%;
-            margin: 10px auto 0 auto;
-            padding: 0 25px;
-            box-sizing: border-box;
-            display: none; /* Sembunyi secara default, muncul jika tipe 'link' */
-        }
-        .btn-direct-link {
-            display: block;
-            background-color: #3498db;
-            color: white;
-            text-decoration: none;
-            text-align: center;
-            padding: 12px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 16px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.2);
-            transition: background 0.2s;
-        }
-        .btn-direct-link:hover {
-            background-color: #2980b9;
-        }
+<style>
+* {
+  margin: 0; padding: 0; box-sizing: border-box;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+}
 
-        .viewer-area {
-            flex: 1;
-            padding: 25px;
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            flex-direction: column;
-            align-items: center;
-        }
-        .content-box {
-            width: 100%;
-            max-width: 1200px;
-            background: #ffffff;
-            color: #222222;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
-            font-size: 20px;
-            line-height: 1.6;
-            min-height: 400px;
-            transition: all 0.3s;
-            box-sizing: border-box;
-            overflow: auto;
-            margin-top: 15px;
-        }
-        
-        .content-box:fullscreen {
-            max-width: 100% !important;
-            width: 100vw !important;
-            height: 100vh !important;
-            border-radius: 0 !important;
-            padding: 15px !important;
-            background-color: #ffffff;
-            margin-top: 0;
-        }
-        
-        iframe {
-            width: 100%;
-            height: 75vh;
-            border: none;
-            border-radius: 8px;
-            background: white;
-            display: block;
-        }
-        
-        .status-tv {
-            font-size: 13px;
-            color: #2ecc71;
-            margin-top: 12px;
-            font-weight: bold;
-            background: rgba(46, 204, 113, 0.1);
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-        }
+html, body {
+  width: 100%; height: 100%; height: 100vh; height: 100dvh;
+  overflow: hidden; background: #090d16; color: #f8fafc;
+}
 
-        .excel-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 16px;
-            color: #111111;
-            background: #ffffff;
-            margin-top: 10px;
-        }
-        .excel-table th, .excel-table td {
-            border: 1px solid #b0b0b0;
-            padding: 12px 14px;
-            text-align: left;
-        }
-        .excel-table th {
-            background-color: #2980b9 !important;
-            color: white !important;
-            font-weight: bold;
-        }
-        .excel-table tr:nth-child(even) {
-            background-color: #f8fafd;
-        }
-    </style>
+body { display: flex; flex-direction: column; position: relative; }
+
+header {
+  background: #111827; padding: 15px 30px; display: flex;
+  justify-content: space-between; align-items: center;
+  border-bottom: 3px solid #3b82f6; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  z-index: 10; flex-shrink: 0;
+}
+
+.logo-title h1 {
+  font-size: 2rem; font-weight: 800; color: #60a5fa; letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.logo-title p { color: #94a3b8; font-size: 1rem; margin-top: 2px; font-weight: 700; }
+
+.datetime-container {
+  text-align: right; background: #1e293b; padding: 10px 22px;
+  border-radius: 12px; border: 1px solid #3b82f6; display: flex; align-items: center; gap: 15px;
+}
+
+#clock {
+  font-family: 'JetBrains Mono', monospace; font-size: 2.2rem; font-weight: 800;
+  color: #38bdf8; line-height: 1;
+}
+
+#date { font-size: 0.95rem; color: #f1f5f9; margin-top: 4px; font-weight: 700; }
+
+.btn-setting {
+  background: #2563eb; color: #ffffff; border: none; padding: 12px 20px;
+  border-radius: 10px; cursor: pointer; font-weight: 800; font-size: 1rem;
+  transition: all 0.2s; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+}
+
+.btn-setting:hover { background: #1d4ed8; transform: translateY(-2px); }
+
+main { 
+  flex: 1; padding: 20px 30px; display: flex; flex-direction: column; 
+  z-index: 1; overflow: hidden; height: calc(100% - 90px);
+}
+
+.table-container {
+  width: 100%; height: 100%; background: #111827; border-radius: 16px;
+  overflow-y: auto; border: 1px solid #374151; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: left; }
+
+th {
+  position: sticky; top: 0; z-index: 5; background: #1f2937; color: #38bdf8;
+  font-size: 1.05rem; font-weight: 800; padding: 18px 12px; text-transform: uppercase;
+  border-bottom: 3px solid #3b82f6; text-align: center;
+}
+
+td {
+  padding: 16px 12px; font-size: 1.1rem; color: #f8fafc;
+  border-bottom: 1px solid #1f2937; vertical-align: middle; text-align: center;
+}
+
+tr:nth-child(even) { background-color: rgba(255, 255, 255, 0.02); }
+tr:hover td { background: #1e293b; }
+
+.col-no { width: 5%; font-weight: 800; color: #94a3b8; }
+.col-tgl { width: 14%; font-weight: 700; color: #facc15; font-family: 'JetBrains Mono', monospace; }
+.col-tugas { width: 25%; font-weight: 800; color: #ffffff; text-align: left; }
+.col-st-akan { width: 12%; }
+.col-st-sedang { width: 12%; }
+.col-st-selesai { width: 12%; }
+.col-ket { width: 12%; text-align: left; color: #cbd5e1; font-weight: 600; }
+.col-action { width: 8%; }
+
+.status-indicator {
+  display: inline-block; padding: 6px 12px; border-radius: 8px; font-size: 0.9rem;
+  font-weight: 800; text-transform: uppercase; width: 100%; text-align: center;
+}
+
+.ind-akan { background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1.5px solid #f59e0b; }
+.ind-sedang { background: rgba(59, 130, 246, 0.25); color: #60a5fa; border: 1.5px solid #3b82f6; animation: pulse-glow 2s infinite; }
+.ind-selesai { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1.5px solid #10b981; }
+.ind-off { opacity: 0.15; filter: grayscale(100%); }
+
+@keyframes pulse-glow {
+  0% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+  50% { box-shadow: 0 0 15px rgba(59, 130, 246, 0.8); }
+  100% { box-shadow: 0 0 5px rgba(59, 130, 246, 0.4); }
+}
+
+.btn-action-group { display: flex; gap: 6px; justify-content: center; }
+.btn-icon {
+  background: #1e293b; border: 1px solid #475569; border-radius: 6px;
+  width: 34px; height: 34px; display: flex; justify-content: center; align-items: center;
+  cursor: pointer; color: #f8fafc; fill: currentColor;
+}
+.btn-icon svg { width: 18px; height: 18px; }
+.btn-edit:hover { background: #f59e0b; }
+.btn-delete:hover { background: #ef4444; }
+.btn-save { background: #10b981; }
+
+.edit-input, .edit-select, .edit-date {
+  background: #0f172a; border: 1px solid #3b82f6; color: #f8fafc;
+  padding: 6px; border-radius: 6px; font-size: 0.95rem; width: 100%; font-weight: 700;
+}
+
+.modal-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(2, 6, 23, 0.85);
+  backdrop-filter: blur(8px); display: flex; justify-content: center; align-items: center;
+  z-index: 1000; opacity: 0; pointer-events: none; transition: all 0.3s;
+}
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.modal-content {
+  background: #111827; width: 90%; max-width: 550px; border-radius: 16px;
+  border: 1px solid #3b82f6; padding: 25px; display: flex; flex-direction: column;
+}
+
+.modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #374151; padding-bottom: 10px; }
+.modal-header h2 { font-size: 1.3rem; color: #38bdf8; font-weight: 800; }
+.btn-close { background: none; border: none; color: #94a3b8; font-size: 1.5rem; cursor: pointer; }
+
+.form-group { display: flex; flex-direction: column; gap: 4px; margin-bottom: 12px; text-align: left; }
+.form-group label { font-size: 0.85rem; color: #94a3b8; font-weight: 700; text-transform: uppercase; }
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+.form-group input {
+  background: #1f2937; border: 1px solid #374151; color: #f8fafc;
+  padding: 10px; border-radius: 8px; font-size: 0.95rem; width: 100%; font-weight: 700;
+}
+
+.btn-add {
+  background: #10b981; color: white; border: none; padding: 12px; border-radius: 8px;
+  font-weight: 800; cursor: pointer; font-size: 1rem; margin-top: 10px;
+}
+.btn-add:hover { background: #059669; }
+
+#tizenAudioUnlocker {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: #090d16; z-index: 99999; display: flex; flex-direction: column;
+  justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;
+}
+</style>
 </head>
 <body>
 
-<div class="header">
-    <div class="title">📺 Universal Real-Time TV Monitor</div>
-    
-    <div class="control-panel">
-        <div>
-            <label for="fileInput" class="btn-source">📁 Kirim File dari HP/PC</label>
-            <input type="file" id="fileInput" accept=".docx, .pdf, .txt, .xlsx, .xls, .pptx, .ppt, image/*" style="display: none;">
-        </div>
-        <div class="cloud-input-group">
-            <input type="url" id="cloudUrl" class="cloud-input" placeholder="Masukkan Tautan Google Sheets / Slides / Drive / Web...">
-            <button class="btn-cloud" onclick="kirimTautan()">Kirim Link</button>
-        </div>
-        <button class="btn-fullscreen" onclick="toggleFullScreen()">🖥️ Full Screen</button>
-    </div>
-    <div class="status-tv" id="koneksiStatus">Menghubungkan ke Sistem Jaringan...</div>
+<div id="tizenAudioUnlocker">
+  <h1 style="font-size: 2.2rem; margin-bottom: 15px; color: #38bdf8; font-weight: 800;">MONITORING STATUS TUGAS</h1>
+  <p style="font-size: 1.1rem; margin-bottom: 25px; color: #94a3b8; max-width: 500px; font-weight: bold;">Tekan tombol di bawah untuk mengaktifkan Sinyal Suara & Fullscreen.</p>
+  <button onclick="bukaKunciAudio()" style="padding: 16px 36px; font-size: 1.2rem; font-weight: 800; background: #10b981; color: white; border: none; border-radius: 12px; cursor: pointer;">
+    🔊 TEKAN UNTUK AKTIFKAN SUARA
+  </button>
 </div>
 
-<div class="direct-link-container" id="linkContainer">
-    <a href="#" id="directLink" target="_blank" class="btn-direct-link">🔗 Buka Sumber Link Asli (Google Drive / Web)</a>
-</div>
-
-<div class="viewer-area">
-    <div class="content-box" id="contentBox">
-        <p style="text-align: center; color: #7f8c8d; font-size: 18px;">Menunggu kiriman data/dokumen dari perangkat HP...</p>
+<header>
+  <div class="logo-title">
+    <h1>MONITORING TUGAS & KEGIATAN</h1>
+    <p>Sistem Pemantauan Status Real-Time (Cloud Baru)</p>
+  </div>
+  <div class="datetime-container">
+    <div>
+      <div id="clock">00:00</div>
+      <div id="date">Memuat Tanggal...</div>
     </div>
+    <button class="btn-setting" onclick="toggleModal(true)">➕ Tambah Tugas</button>
+  </div>
+</header>
+
+<main>
+  <div class="table-container">
+    <table>
+      <thead>
+        <tr>
+          <th class="col-no">NO</th>
+          <th class="col-tgl">TGL</th>
+          <th class="col-tugas">TUGAS</th>
+          <th class="col-st-akan">AKAN DIKERJAKAN</th>
+          <th class="col-st-sedang">SEDANG DIKERJAKAN</th>
+          <th class="col-st-selesai">SELESAI</th>
+          <th class="col-ket">KETERANGAN</th>
+          <th class="col-action">AKSI</th>
+        </tr>
+      </thead>
+      <tbody id="main-table-body">
+        <tr><td colspan="8" style="text-align: center; color: #94a3b8;">Menghubungkan ke Database Baru...</td></tr>
+      </tbody>
+    </table>
+  </div>
+</main>
+
+<div class="modal-overlay" id="settingModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h2>➕ Tambah Tugas Baru</h2>
+      <button class="btn-close" onclick="toggleModal(false)">✕</button>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label for="inputTglMulai">Tanggal Mulai:</label>
+        <input type="date" id="inputTglMulai">
+      </div>
+      <div class="form-group">
+        <label for="inputTglSelesai">Tanggal Selesai:</label>
+        <input type="date" id="inputTglSelesai">
+      </div>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group">
+        <label>Jam Mulai (HH:MM):</label>
+        <input type="time" id="inputJamMulai" value="08:00">
+      </div>
+      <div class="form-group">
+        <label>Jam Selesai (HH:MM):</label>
+        <input type="time" id="inputJamSelesai" value="16:00">
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label for="inputTugas">Nama Tugas:</label>
+      <input type="text" id="inputTugas" placeholder="Rincian Tugas yang akan dikerjakan">
+    </div>
+
+    <div class="form-group">
+      <label for="inputKeterangan">Keterangan:</label>
+      <input type="text" id="inputKeterangan" placeholder="Penanggung Jawab / Lokasi / Catatan">
+    </div>
+
+    <button class="btn-add" onclick="addNewTask()">＋ Simpan ke Database Baru</button>
+  </div>
 </div>
 
 <script>
-    const SUPABASE_URL = "https://ftokzxocmfwzitafwqoz.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZ0b2t6eG9jbWZ3eml0YWZ3cW96Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODMzODQ0MjksImV4cCI6MjA5ODk2MDQyOX0.-gHTYgaL5Skq8BOLZ1g4wt74tcfTPcqBkt81u-8WHGU";
+// ENDPOINT DATABASE JSON BARU (INDEPENDEN)
+const dbURL = "https://api.npoint.io/c8f2e46b1d935402179a";
 
-    let supabaseClient = null;
-    let channelRealtime = null;
+let systemTasks = [];
+let editingRowIndex = -1;
+let spokenStatusMap = new Map();
+let audioCtx = null;
 
-    window.onload = function() {
-        inisialisasiSupabase();
-    };
+const iconPencil = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
+const iconTrash = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
+const iconSave = '<svg viewBox="0 0 24 24"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
 
-    function inisialisasiSupabase() {
-        try {
-            supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-            document.getElementById('koneksiStatus').innerHTML = "Sistem Sinkronisasi Otomatis Terhubung 🟢";
-            
-            channelRealtime = supabaseClient.channel('tv_channel', {
-                config: { broadcast: { self: true } }
-            });
+function initAudioEngine() {
+  if (!audioCtx) {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) audioCtx = new AudioContextClass();
+  }
+  if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+}
 
-            channelRealtime.on('broadcast', { event: 'update_doc' }, (response) => {
-                if (response.payload) {
-                    tampilkanDokumen(response.payload);
-                }
-            }).subscribe();
+function bukaKunciAudio() {
+  initAudioEngine();
+  document.getElementById('tizenAudioUnlocker').style.display = 'none';
+  playChimeNotification([523.25, 659.25, 783.99]);
+}
 
-        } catch (e) {
-            document.getElementById('koneksiStatus').innerHTML = "Gagal Terhubung ke Cloud Server 🔴";
+function playTone(freq, type, duration, delay = 0) {
+  initAudioEngine();
+  if (!audioCtx) return;
+  setTimeout(() => {
+    try {
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+      gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.00001, audioCtx.currentTime + duration);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start(audioCtx.currentTime);
+      osc.stop(audioCtx.currentTime + duration);
+    } catch (e) { console.error(e); }
+  }, delay);
+}
+
+function playChimeNotification(freqs = [440, 554.37, 659.25]) {
+  freqs.forEach((f, i) => playTone(f, 'sine', 0.8, i * 200));
+}
+
+function panggilSuaraAI(teks) {
+  playChimeNotification([523.25, 659.25, 783.99, 1046.50]);
+  setTimeout(() => {
+    try {
+      const existingAudio = document.getElementById('audioTTS');
+      if (existingAudio) existingAudio.remove();
+
+      const encodedText = encodeURIComponent(teks);
+      const ttsUrl = 'https://translate.google.com/translate_tts?ie=UTF-8&q=' + encodedText + '&tl=id&client=tw-ob';
+
+      const audio = new Audio(ttsUrl);
+      audio.id = 'audioTTS';
+      audio.playbackRate = 0.95;
+      audio.play().catch(() => {
+        if ('speechSynthesis' in window) {
+          window.speechSynthesis.cancel();
+          const speech = new SpeechSynthesisUtterance(teks);
+          speech.lang = 'id-ID';
+          speech.pitch = 1.1;
+          window.speechSynthesis.speak(speech);
         }
-    }
+      });
+    } catch (e) { console.error("Gagal suara TTS:", e); }
+  }, 1000);
+}
 
-    function toggleFullScreen() {
-        const targetVisual = document.getElementById("contentBox");
-        if (!document.fullscreenElement) {
-            targetVisual.requestFullscreen().catch(err => {
-                alert(`Gagal mengaktifkan mode Full Screen: ${err.message}`);
-            });
-        } else {
-            document.exitFullscreen();
-        }
-    }
+function updateDateTime() {
+  const now = new Date();
+  const hours = String(now.getHours()).padStart(2, '0');
+  const minutes = String(now.getMinutes()).padStart(2, '0');
+  document.getElementById('clock').textContent = hours + ':' + minutes;
+  document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+  updateTaskStatuses();
+}
 
-    document.getElementById('fileInput').addEventListener('change', async function(event) {
-        if (!supabaseClient) return alert("Koneksi server terputus!");
-        const file = event.target.files[0];
-        if (!file) return;
+// AMBIL DATA DARI DATABASE BARU
+async function loadDataFromCloud() {
+  if (editingRowIndex !== -1) return;
+  try {
+    const response = await fetch(dbURL + '?_=' + new Date().getTime());
+    if (!response.ok) throw new Error("Gagal mengambil data");
+    
+    systemTasks = await response.json();
+    if (!Array.isArray(systemTasks)) systemTasks = [];
+    renderTasks(false);
+  } catch (e) {
+    console.error("Koneksi database terganggu:", e);
+  }
+}
 
-        const extension = file.name.split('.').pop().toLowerCase();
-        const uniqueTime = new Date().getTime();
-        const secureFileName = `${uniqueTime}.${extension}`;
-        
-        document.getElementById('contentBox').innerHTML = '<p style="text-align: center; color: #3498db; font-size: 18px;">Sedang memproses dan mengunggah berkas ke cloud...</p>';
-
-        try {
-            const { data, error } = await supabaseClient
-                .storage
-                .from('dokumen')
-                .upload(secureFileName, file, { 
-                    cacheControl: '0', 
-                    upsert: true
-                });
-
-            if (error) throw error;
-
-            const { data: urlData } = supabaseClient.storage.from('dokumen').getPublicUrl(secureFileName);
-            if (!urlData || !urlData.publicUrl) throw new Error("Gagal generate link publik.");
-
-            await channelRealtime.send({
-                type: 'broadcast',
-                event: 'update_doc',
-                payload: { 
-                    url: urlData.publicUrl, 
-                    type: 'file', 
-                    ext: extension,
-                    originalUrl: urlData.publicUrl // simpan link asli
-                }
-            });
-
-            alert("Sukses! File berhasil dikirim.");
-        } catch (error) {
-            alert("Gagal Mengirim: " + error.message);
-            document.getElementById('contentBox').innerHTML = `<p style="text-align: center; color: #e74c3c; font-size: 18px;">Gagal memproses file: ${error.message}</p>';`;
-        }
+// SIMPAN DATA KE DATABASE BARU
+async function saveDataToCloud() {
+  try {
+    const res = await fetch(dbURL, {
+      method: 'POST',
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(systemTasks)
     });
+    if (!res.ok) throw new Error("Gagal menyimpan data");
+  } catch (e) { 
+    console.error("Gagal simpan:", e);
+    alert("Gagal memperbarui data ke Server Baru. Periksa koneksi internet.");
+  }
+}
 
-    async function kirimTautan() {
-        if (!supabaseClient || !channelRealtime) return alert("Koneksi server terputus!");
-        let url = document.getElementById('cloudUrl').value.trim();
-        if (!url) return alert("Silakan masukkan tautan terlebih dahulu!");
+function formatTanggalSimple(dateStr) {
+  if (!dateStr) return '';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return dateStr;
+  return d.toLocaleDateString('id-ID', { day: '2-digit', month: '2-digit', year: '2-digit' });
+}
 
-        let finalUrl = url;
-        
-        if (url.includes("docs.google.com/spreadsheets")) {
-            let sheetId = url.split('/d/')[1].split('/')[0];
-            finalUrl = `https://docs.google.com/spreadsheets/d/${sheetId}/preview?rm=minimal`;
-        } 
-        else if (url.includes("docs.google.com/presentation")) {
-            let slideId = url.split('/d/')[1].split('/')[0];
-            finalUrl = `https://docs.google.com/presentation/d/${slideId}/embed?rm=minimal`;
-        } 
-        else if (url.includes("docs.google.com/document")) {
-            let docId = url.split('/d/')[1].split('/')[0];
-            finalUrl = `https://docs.google.com/document/d/${docId}/preview`;
-        }
-        else if (url.includes("drive.google.com/file/d/")) {
-            let fileId = url.split('/file/d/')[1].split('/')[0];
-            finalUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-        } 
-        else if (url.includes("drive.google.com/drive/folders/")) {
-            let folderId = url.split('/folders/')[1].split('?')[0];
-            finalUrl = `https://drive.google.com/embeddedfolderview?id=${folderId}#grid`;
-        }
+function renderTasks(shouldSave = true) {
+  const tbody = document.getElementById('main-table-body');
+  if (!tbody) return;
+  tbody.innerHTML = '';
 
-        // Kirim data lengkap termasuk url asli sebelum di-bypass
-        await channelRealtime.send({
-            type: 'broadcast',
-            event: 'update_doc',
-            payload: { url: finalUrl, type: 'link', ext: '', originalUrl: url }
-        });
-        
-        alert("Link sukses disiarkan!");
-        document.getElementById('cloudUrl').value = "";
+  if (systemTasks.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #94a3b8; font-weight: bold; padding: 30px;">Database baru masih kosong. Klik + Tambah Tugas untuk membuat entry pertama.</td></tr>';
+    if (shouldSave) saveDataToCloud();
+    return;
+  }
+
+  systemTasks.forEach((item, index) => {
+    const tr = document.createElement('tr');
+    tr.setAttribute('id', 'row-' + index);
+
+    if (editingRowIndex === index) {
+      tr.innerHTML = 
+        '<td class="col-no">' + (index + 1) + '</td>' +
+        '<td class="col-tgl">' +
+          '<input type="date" class="edit-date" id="edit-tglMulai" value="' + item.tglMulai + '">' +
+          '<input type="time" class="edit-input" id="edit-jamMulai" value="' + (item.jamMulai || '08:00') + '" style="margin-top:2px;">' +
+        '</td>' +
+        '<td class="col-tugas"><input type="text" class="edit-input" id="edit-tugas" value="' + item.tugas + '"></td>' +
+        '<td colspan="3"><span style="color:#fbbf24; font-weight:bold;">Sedang Mengedit...</span></td>' +
+        '<td class="col-ket"><input type="text" class="edit-input" id="edit-keterangan" value="' + (item.keterangan || '') + '"></td>' +
+        '<td class="col-action">' +
+          '<div class="btn-action-group">' +
+            '<button class="btn-icon btn-save" onclick="saveInlineEdit(' + index + ')" title="Simpan">' + iconSave + '</button>' +
+          '</div>' +
+        '</td>';
+    } else {
+      tr.setAttribute('data-index', index);
+      tr.setAttribute('data-start', item.tglMulai + 'T' + (item.jamMulai || '00:00'));
+      tr.setAttribute('data-end', (item.tglSelesai || item.tglMulai) + 'T' + (item.jamSelesai || '23:59'));
+
+      let displayTgl = formatTanggalSimple(item.tglMulai);
+
+      tr.innerHTML = 
+        '<td class="col-no">' + (index + 1) + '</td>' +
+        '<td class="col-tgl">' + displayTgl + '<br><small style="color:#94a3b8;">' + (item.jamMulai || '') + '</small></td>' +
+        '<td class="col-tugas">' + item.tugas + '</td>' +
+        '<td class="col-st-akan"><span class="status-indicator ind-akan ind-off">AKAN</span></td>' +
+        '<td class="col-st-sedang"><span class="status-indicator ind-sedang ind-off">PROSES</span></td>' +
+        '<td class="col-st-selesai"><span class="status-indicator ind-selesai ind-off">SELESAI</span></td>' +
+        '<td class="col-ket">' + (item.keterangan || '-') + '</td>' +
+        '<td class="col-action">' +
+          '<div class="btn-action-group">' +
+            '<button class="btn-icon btn-edit" onclick="enableInlineEdit(' + index + ')" title="Edit">' + iconPencil + '</button>' +
+            '<button class="btn-icon btn-delete" onclick="deleteTask(' + index + ')" title="Hapus">' + iconTrash + '</button>' +
+          '</div>' +
+        '</td>';
     }
 
-    function tampilkanDokumen(payload) {
-        const box = document.getElementById('contentBox');
-        const linkContainer = document.getElementById('linkContainer');
-        const directLink = document.getElementById('directLink');
-        
-        box.innerHTML = "";
-        box.style.background = "#ffffff";
-        box.style.padding = "25px";
-        
-        // Manajemen Tombol Link Otomatis
-        if (payload.originalUrl) {
-            linkContainer.style.display = "block";
-            directLink.href = payload.originalUrl;
-        } else {
-            linkContainer.style.display = "none";
-        }
+    tbody.appendChild(tr);
+  });
 
-        const ext = payload.ext ? payload.ext.toLowerCase() : '';
+  updateTaskStatuses();
+  if (shouldSave) saveDataToCloud();
+}
 
-        if (payload.type === 'link') {
-            box.style.background = "transparent";
-            box.style.padding = "0";
-            box.innerHTML = `<iframe src="${payload.url}" allow="autoplay"></iframe>`;
-        } 
-        else if (ext === 'docx') {
-            fetch(payload.url).then(res => res.arrayBuffer()).then(buffer => {
-                mammoth.convertToHtml({arrayBuffer: buffer}).then(result => {
-                    box.innerHTML = `<div style="font-size:24px; color:#222; text-align:left;">${result.value}</div>`;
-                });
-            }).catch(err => {
-                box.innerHTML = `<p style="text-align:center; color:#e74c3c;">Gagal membaca file Word</p>`;
-            });
-        } 
-        else if (['xlsx', 'xls'].includes(ext)) {
-            fetch(payload.url)
-                .then(res => {
-                    if (!res.ok) throw new Error("File tidak ditemukan.");
-                    return res.arrayBuffer();
-                })
-                .then(buffer => {
-                    const workbook = XLSX.read(new Uint8Array(buffer), { type: 'array' });
-                    const sheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[sheetName];
-                    
-                    const htmlTable = XLSX.utils.sheet_to_html(worksheet);
-                    box.innerHTML = `<div style="width:100%; overflow-x:auto;">${htmlTable}</div>`;
-                    
-                    const tableEl = box.querySelector('table');
-                    if (tableEl) {
-                        tableEl.classList.add('excel-table');
-                        tableEl.removeAttribute('border');
-                    }
-                })
-                .catch(err => {
-                    box.style.background = "transparent";
-                    box.style.padding = "0";
-                    box.innerHTML = `<iframe src="https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}"></iframe>`;
-                });
-        } 
-        else if (['pptx', 'ppt'].includes(ext)) {
-            box.style.background = "transparent";
-            box.style.padding = "0";
-            const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(payload.url)}`;
-            box.innerHTML = `<iframe src="${officeViewerUrl}"></iframe>`;
-        } 
-        else if (ext === 'pdf') {
-            box.style.background = "transparent";
-            box.style.padding = "0";
-            const pdfViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(payload.url)}&embedded=true`;
-            box.innerHTML = `<iframe src="${pdfViewerUrl}"></iframe>`;
-        }
-        else if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
-            box.style.background = "transparent";
-            box.style.padding = "0";
-            box.innerHTML = `<img src="${payload.url}?t=${new Date().getTime()}" style="max-width:100%; max-height:75vh; display:block; margin:0 auto; border-radius:8px; box-shadow:0 4px 15px rgba(0,0,0,0.3);">`;
-        } 
-        else if (ext === 'txt') {
-            fetch(payload.url).then(res => res.text()).then(text => {
-                box.innerHTML = `<pre style="white-space: pre-wrap; font-size:22px; color:#222; text-align:left; font-family:monospace;">${text}</pre>`;
-            });
-        } 
-        else {
-            box.style.background = "transparent";
-            box.style.padding = "0";
-            box.innerHTML = `<iframe src="${payload.url}"></iframe>`;
-        }
+function enableInlineEdit(index) {
+  editingRowIndex = index;
+  renderTasks(false);
+}
+
+function saveInlineEdit(index) {
+  const tglMulai = document.getElementById('edit-tglMulai').value;
+  const jamMulai = document.getElementById('edit-jamMulai').value;
+  const tugas = document.getElementById('edit-tugas').value.trim();
+  const keterangan = document.getElementById('edit-keterangan').value.trim();
+
+  if (!tglMulai || !tugas) return alert("Tanggal dan Tugas wajib diisi!");
+
+  systemTasks[index] = { ...systemTasks[index], tglMulai, jamMulai, tugas, keterangan };
+  editingRowIndex = -1;
+  renderTasks(true);
+}
+
+function deleteTask(index) {
+  if (confirm("Hapus tugas ini secara permanen dari server?")) {
+    systemTasks.splice(index, 1);
+    renderTasks(true);
+  }
+}
+
+function addNewTask() {
+  const tglMulai = document.getElementById('inputTglMulai').value;
+  const tglSelesai = document.getElementById('inputTglSelesai').value || tglMulai;
+  const jamMulai = document.getElementById('inputJamMulai').value;
+  const jamSelesai = document.getElementById('inputJamSelesai').value;
+  const tugas = document.getElementById('inputTugas').value.trim();
+  const keterangan = document.getElementById('inputKeterangan').value.trim();
+
+  if (!tglMulai || !tugas) return alert("Isi tanggal dan nama tugas!");
+
+  systemTasks.push({ tglMulai, tglSelesai, jamMulai, jamSelesai, tugas, keterangan });
+  renderTasks(true);
+
+  document.getElementById('inputTugas').value = '';
+  document.getElementById('inputKeterangan').value = '';
+  toggleModal(false);
+}
+
+function updateTaskStatuses() {
+  if (editingRowIndex !== -1) return;
+  const now = new Date().getTime();
+
+  document.querySelectorAll('#main-table-body tr[data-start]').forEach(row => {
+    const idx = row.getAttribute('data-index');
+    const startVal = new Date(row.getAttribute('data-start')).getTime();
+    const endVal = new Date(row.getAttribute('data-end')).getTime();
+
+    const elAkan = row.querySelector('.col-st-akan .status-indicator');
+    const elSedang = row.querySelector('.col-st-sedang .status-indicator');
+    const elSelesai = row.querySelector('.col-st-selesai .status-indicator');
+    const namaTugas = row.querySelector('.col-tugas').textContent;
+
+    if (!elAkan || !elSedang || !elSelesai) return;
+
+    let currentStatus = '';
+
+    if (now > endVal) {
+      elAkan.className = 'status-indicator ind-akan ind-off';
+      elSedang.className = 'status-indicator ind-sedang ind-off';
+      elSelesai.className = 'status-indicator ind-selesai';
+      currentStatus = 'SELESAI';
+    } else if (now >= startVal && now <= endVal) {
+      elAkan.className = 'status-indicator ind-akan ind-off';
+      elSedang.className = 'status-indicator ind-sedang';
+      elSelesai.className = 'status-indicator ind-selesai ind-off';
+      currentStatus = 'SEDANG DIKERJAKAN';
+    } else {
+      elAkan.className = 'status-indicator ind-akan';
+      elSedang.className = 'status-indicator ind-sedang ind-off';
+      elSelesai.className = 'status-indicator ind-selesai ind-off';
+      currentStatus = 'AKAN DIKERJAKAN';
     }
+
+    const lastStatus = spokenStatusMap.get(idx);
+    if (lastStatus !== currentStatus) {
+      spokenStatusMap.set(idx, currentStatus);
+      if (lastStatus !== undefined) {
+        panggilSuaraAI('Pemberitahuan. Tugas ' + namaTugas + ' saat ini berstatus ' + currentStatus);
+      }
+    }
+  });
+}
+
+function toggleModal(show) {
+  document.getElementById('settingModal').classList.toggle('active', show);
+}
+
+document.getElementById('inputTglMulai').valueAsDate = new Date();
+document.getElementById('inputTglSelesai').valueAsDate = new Date();
+
+setInterval(updateDateTime, 1000);
+updateDateTime();
+loadDataFromCloud();
+setInterval(loadDataFromCloud, 5000);
 </script>
 </body>
 </html>
