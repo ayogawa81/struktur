@@ -237,6 +237,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 .edit-input, .edit-select, .edit-date {
   background: #060e13; border: 1px solid var(--neon-cyan); color: #f8fafc;
   padding: 6px 10px; border-radius: 4px; font-size: 0.85rem; width: 100%; font-weight: 700; text-align: center;
+  color-scheme: dark;
 }
 
 /* MODAL STYLING */
@@ -277,7 +278,7 @@ tr:hover td { background: rgba(0, 240, 255, 0.05); color: #ffffff; }
 .form-group input, .form-group select {
   background: #050a0e; border: 1px solid var(--border-tactical); color: #f8fafc;
   padding: 12px 14px; border-radius: 4px; font-size: 0.9rem; width: 100%; font-weight: 700;
-  transition: all 0.2s;
+  transition: all 0.2s; color-scheme: dark;
 }
 .form-group input:focus, .form-group select:focus {
   outline: none; border-color: var(--neon-green); box-shadow: 0 0 12px rgba(0, 255, 157, 0.4);
@@ -510,6 +511,7 @@ async function saveData() {
 }
 
 async function loadData() {
+  // Cegah auto-reload jika sedang mengedit baris atau sedang proses simpan
   if (editingRowIndex !== -1 || isSaving) return;
 
   const localData = localStorage.getItem('korpasgat_tasks_data');
@@ -531,7 +533,7 @@ async function loadData() {
     clearTimeout(timeoutId);
     if (response.ok) {
       const cloudData = await response.json();
-      if (Array.isArray(cloudData)) {
+      if (Array.isArray(cloudData) && editingRowIndex === -1) {
         systemTasks = cloudData;
         localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
         renderTasks(false);
@@ -539,7 +541,7 @@ async function loadData() {
     }
   } catch (e) {
     console.warn("Gagal terhubung ke cloud server, menggunakan lokal data.");
-    if (systemTasks.length === 0) renderTasks(false);
+    if (systemTasks.length === 0 && editingRowIndex === -1) renderTasks(false);
   }
 }
 
@@ -551,6 +553,9 @@ function formatTanggalSimple(dateStr) {
 }
 
 function renderTasks(triggerSave = true) {
+  // Hentikan render ulang jika sedang mengedit dan bukan pemicu manual
+  if (editingRowIndex !== -1 && !triggerSave) return;
+
   const tbody = document.getElementById('main-table-body');
   if (!tbody) return;
   tbody.innerHTML = '';
@@ -572,7 +577,7 @@ function renderTasks(triggerSave = true) {
     if (editingRowIndex === index) {
       tr.innerHTML = 
         '<td class="col-no">' + (index + 1) + '</td>' +
-        '<td class="col-tgl"><input type="date" class="edit-date" id="edit-tgl" value="' + item.tgl + '"></td>' +
+        '<td class="col-tgl"><input type="date" class="edit-date" id="edit-tgl" value="' + (item.tgl || '') + '"></td>' +
         '<td class="col-jam"><input type="time" class="edit-input" id="edit-jam" value="' + (item.jam || '08:00') + '"></td>' +
         '<td class="col-tugas"><input type="text" class="edit-input" id="edit-tugas" value="' + item.tugas + '"></td>' +
         '<td class="col-penting">' +
