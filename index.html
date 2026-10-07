@@ -252,22 +252,13 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); 
 }
 
+/* OVERLAY UNLOCKER DISEMBUNYIKAN */
 #tizenAudioUnlocker {
-  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-  background: #05070a; z-index: 99999; display: flex; flex-direction: column;
-  justify-content: center; align-items: center; color: white; text-align: center; padding: 20px;
+  display: none !important;
 }
 </style>
 </head>
 <body>
-
-<div id="tizenAudioUnlocker">
-  <h1 style="font-size: 2rem; margin-bottom: 12px; color: #f59e0b; font-weight: 900; letter-spacing: 2px;">TACTICAL MONITORING DASHBOARD</h1>
-  <p style="font-size: 1rem; margin-bottom: 30px; color: #64748b; max-width: 480px; font-weight: 700;">Klik tombol di bawah untuk mengaktifkan antarmuka audio & konsol sistem.</p>
-  <button onclick="bukaKunciAudio()" style="padding: 16px 36px; font-size: 1rem; font-weight: 800; letter-spacing: 1.5px; background: linear-gradient(135deg, #d97706 0%, #b45309 100%); color: white; border: 1px solid #f59e0b; border-radius: 8px; cursor: pointer; box-shadow: 0 0 25px rgba(245, 158, 11, 0.4);">
-    ⚡ AKTIFKAN SISTEM
-  </button>
-</div>
 
 <header>
   <div class="logo-title">
@@ -302,7 +293,7 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
         </tr>
       </thead>
       <tbody id="main-table-body">
-        <tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: 700; padding: 40px;">Memuat Data...</td></tr>
+        <tr><td colspan="11" style="text-align: center; color: #64748b; font-weight: 700; padding: 40px;">Memuat Data Cloud...</td></tr>
       </tbody>
     </table>
   </div>
@@ -364,10 +355,6 @@ let systemTasks = [];
 let editingRowIndex = -1;
 let audioCtx = null;
 let isSaving = false;
-let systemSchedules = [];
-let currentHours = "00";
-let currentMinutes = "00";
-let spokenSchedules = new Set();
 
 const iconPencil = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
 const iconTrash = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
@@ -379,12 +366,6 @@ function initAudioEngine() {
     if (AudioContextClass) audioCtx = new AudioContextClass();
   }
   if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
-}
-
-function bukaKunciAudio() {
-  initAudioEngine();
-  document.getElementById('tizenAudioUnlocker').style.display = 'none';
-  playChimeNotification([523.25, 659.25, 783.99]);
 }
 
 function playTone(freq, type, duration, delay = 0) {
@@ -444,10 +425,9 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// SIMPAN KE BROWSER LOCAL STORAGE DAN CLOUD (DENGAN NO-CACHE CONTROL)
+// SIMPAN HANYA KE CLOUD JSON (TANPA LOCALSTORAGE)
 async function saveData() {
   isSaving = true;
-  localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
   try {
     await fetch(dbURL, {
       method: 'POST',
@@ -464,7 +444,7 @@ async function saveData() {
   }
 }
 
-// AMBIL DATA REAL-TIME DENGAN CACHE-BUSTING & NO-STORE FOR TIZEN TV
+// BACA HANYA DARI CLOUD JSON (TANPA LOCALSTORAGE)
 async function loadData() {
   if (editingRowIndex !== -1 || isSaving) return;
 
@@ -483,7 +463,6 @@ async function loadData() {
       if (Array.isArray(cloudData)) {
         if (JSON.stringify(cloudData) !== JSON.stringify(systemTasks)) {
           systemTasks = cloudData;
-          localStorage.setItem('korpasgat_tasks_data', JSON.stringify(systemTasks));
           renderTasks(false);
         }
       }
@@ -635,7 +614,7 @@ function saveInlineEdit(index) {
 }
 
 function deleteTask(index) {
-  if (confirm("Hapus tugas ini secara permanen dari database?")) {
+  if (confirm("Hapus tugas ini secara permanen dari database cloud?")) {
     systemTasks.splice(index, 1);
     renderTasks(true);
   }
@@ -677,16 +656,18 @@ document.getElementById('inputTgl').valueAsDate = new Date();
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-const localData = localStorage.getItem('korpasgat_tasks_data');
-if (localData) {
-  try {
-    systemTasks = JSON.parse(localData);
-    renderTasks(false);
-  } catch (e) { console.error("Gagal parse localData", e); }
-}
-
+// AMBIL DATA DARI CLOUD
 loadData();
-setInterval(loadData, 5000);
+
+// SINKRONISASI DATA ONLINE DARI CLOUD TIAP 3 DETIK
+setInterval(loadData, 3000);
+
+// REFRESH HARD MEMORI TV TIAP 5 MENIT
+setInterval(function() {
+  if (editingRowIndex === -1 && !isSaving) {
+    location.reload(true);
+  }
+}, 300000);
 </script>
 </body>
 </html>
