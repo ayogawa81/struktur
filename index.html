@@ -251,11 +251,6 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
   background: linear-gradient(135deg, #10b981 0%, #059669 100%);
   box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5); 
 }
-
-/* OVERLAY UNLOCKER DISEMBUNYIKAN */
-#tizenAudioUnlocker {
-  display: none !important;
-}
 </style>
 </head>
 <body>
@@ -349,12 +344,14 @@ tr:hover td { background: rgba(245, 158, 11, 0.03); }
 </div>
 
 <script>
-const dbURL = "https://api.npoint.io/c8f2e46b1d935402179a";
+// PASTIKAN PASTE API BIN NPOINT.IO YANG BARU & MASIH AKTIF DI SINI
+const dbURL = "https://api.npoint.io/b09bcf371bcb97f3cdcb";
 
 let systemTasks = [];
 let editingRowIndex = -1;
 let audioCtx = null;
 let isSaving = false;
+let isDataLoaded = false; // Kunci pengaman agar tidak menimpa array kosong sebelum fetch pertama
 
 const iconPencil = '<svg viewBox="0 0 24 24"><path d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zM20.71 7.04c.39-.39.39-1.02 0-1.41l-2.34-2.34c-.39-.39-1.02-.39-1.41 0l-1.83 1.83 3.75 3.75 1.83-1.83z"/></svg>';
 const iconTrash = '<svg viewBox="0 0 24 24"><path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/></svg>';
@@ -425,31 +422,12 @@ function updateDateTime() {
   document.getElementById('date').textContent = now.toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 }
 
-// SIMPAN HANYA KE CLOUD JSON (TANPA LOCALSTORAGE)
-async function saveData() {
-  isSaving = true;
-  try {
-    await fetch(dbURL, {
-      method: 'POST',
-      headers: { 
-        "Content-Type": "application/json",
-        "Cache-Control": "no-cache, no-store, must-revalidate"
-      },
-      body: JSON.stringify(systemTasks)
-    });
-  } catch (e) {
-    console.error("Gagal sinkronisasi ke cloud:", e);
-  } finally {
-    setTimeout(() => { isSaving = false; }, 1500);
-  }
-}
-
-// BACA HANYA DARI CLOUD JSON (TANPA LOCALSTORAGE)
+// BACA DATA DARI CLOUD JSON
 async function loadData() {
   if (editingRowIndex !== -1 || isSaving) return;
 
   try {
-    const response = await fetch(dbURL + '?t=' + Date.now(), {
+    const response = await fetch(dbURL + '?nocache=' + new Date().getTime(), {
       method: 'GET',
       headers: {
         'Cache-Control': 'no-cache, no-store, must-revalidate',
@@ -461,6 +439,7 @@ async function loadData() {
     if (response.ok) {
       const cloudData = await response.json();
       if (Array.isArray(cloudData)) {
+        isDataLoaded = true; // Tandai data awal telah berhasil diambil dari cloud
         if (JSON.stringify(cloudData) !== JSON.stringify(systemTasks)) {
           systemTasks = cloudData;
           renderTasks(false);
@@ -469,6 +448,34 @@ async function loadData() {
     }
   } catch (e) {
     console.error("Koneksi cloud terganggu:", e);
+  }
+}
+
+// SIMPAN HANYA KE CLOUD JSON
+async function saveData() {
+  if (!isDataLoaded && systemTasks.length === 0) return; // Cegah overwrite data kosong saat startup
+
+  isSaving = true;
+  try {
+    const response = await fetch(dbURL, {
+      method: 'POST',
+      headers: { 
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache, no-store, must-revalidate"
+      },
+      body: JSON.stringify(systemTasks)
+    });
+
+    if (!response.ok) {
+      console.error("Gagal menyimpan ke npoint. Status:", response.status);
+    }
+  } catch (e) {
+    console.error("Gagal sinkronisasi ke cloud:", e);
+  } finally {
+    // Tahan status 'isSaving' selama 2.5 detik agar server selesai memperbarui
+    setTimeout(() => { 
+      isSaving = false; 
+    }, 2500);
   }
 }
 
@@ -656,13 +663,13 @@ document.getElementById('inputTgl').valueAsDate = new Date();
 setInterval(updateDateTime, 1000);
 updateDateTime();
 
-// AMBIL DATA DARI CLOUD
+// LOAD DATA AWAL DARI CLOUD
 loadData();
 
-// SINKRONISASI DATA ONLINE DARI CLOUD TIAP 3 DETIK
+// SINKRONISASI CEK DATA PER 3 DETIK
 setInterval(loadData, 3000);
 
-// REFRESH HARD MEMORI TV TIAP 5 MENIT
+// HARD RELOAD TV UNTUK MEMASIKAN REFRESH MEMORI PER 5 MENIT
 setInterval(function() {
   if (editingRowIndex === -1 && !isSaving) {
     location.reload(true);
